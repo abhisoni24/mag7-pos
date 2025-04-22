@@ -10,6 +10,7 @@ import { UserRole } from '@shared/schema';
 import { login } from '../../redux/authSlice';
 import { AppDispatch, RootState } from '../../redux/store';
 import { useToast } from '@/hooks/use-toast';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -73,12 +74,16 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
+    <div className="h-screen flex items-center justify-center bg-background">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      
       <Card className="w-full max-w-md mx-4">
         <CardContent className="pt-6">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800 font-poppins">Restaurant POS</h1>
-            <p className="text-gray-600 mt-2">Sign in to continue</p>
+            <h1 className="text-2xl font-semibold text-foreground font-poppins">Restaurant POS</h1>
+            <p className="text-muted-foreground mt-2">Sign in to continue</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">
