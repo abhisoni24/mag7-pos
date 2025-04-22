@@ -120,7 +120,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.put("/orders/:orderId/items/:itemId", authenticate, orderController.updateOrderItem); // Waiters can update order items
   
   // Staff routes
-  apiRouter.get("/staff", authenticate, isManager, staffController.getStaff); // Managers and up can view staff
+  // Allow hosts to view waiters for table assignment
+  apiRouter.get("/staff", authenticate, async (req, res) => {
+    try {
+      // If role is host and they're requesting only waiters, allow it
+      const { role } = req.query;
+      if (req.user && req.user.role === UserRole.HOST && role === 'waiter') {
+        return staffController.getStaff(req, res);
+      }
+      
+      // Otherwise, enforce manager permission
+      if (req.user && 
+          (req.user.role === UserRole.MANAGER || 
+           req.user.role === UserRole.OWNER || 
+           req.user.role === UserRole.ADMIN)) {
+        return staffController.getStaff(req, res);
+      }
+      
+      return res.status(403).json({ 
+        message: 'Access denied. You do not have the required permission.' 
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+    }
+  });
   apiRouter.get("/staff/:id", authenticate, isManager, staffController.getStaffMember); // Managers and up can view staff details
   
   // Create staff members - with role validation

@@ -96,67 +96,101 @@ const createSampleMenuItems = async (): Promise<void> => {
   const menuItems = [
     // Appetizers
     {
-      name: 'Garlic Bread',
-      description: 'Toasted bread with garlic butter',
-      price: 4.95,
+      name: 'Power-Up Nachos',
+      description: 'Loaded with cheese, jalapeños, and XP-boosting guac!',
+      price: 9.99,
       category: 'appetizer',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Mozzarella Sticks',
-      description: 'Breaded mozzarella with marinara sauce',
-      price: 6.95,
+      name: 'Health Potion Soup',
+      description: 'Tomato basil with a mana-restoring swirl of cream',
+      price: 6.99,
       category: 'appetizer',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Chicken Wings',
-      description: 'Spicy buffalo wings with blue cheese dip',
-      price: 8.95,
+      name: '1-Up Mushroom Bites',
+      description: 'Fried mushroom caps with a side of pixel sauce (Our own Cajun mix)',
+      price: 7.99,
       category: 'appetizer',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Calamari',
-      description: 'Fried squid with lemon aioli',
-      price: 9.95,
+      name: 'Boss Battle Wings',
+      description: 'Spicy buffalo wings that pack a punch (A blend of Tabasco and jalapeño)!',
+      price: 11.99,
       category: 'appetizer',
       available: true,
-      isSpecial: false
+      isSpecial: true
     },
     
-    // Main Courses
+    // Burgers & Sandwiches
     {
-      name: 'Grilled Salmon',
-      description: 'Fresh salmon with lemon butter sauce',
-      price: 18.95,
-      category: 'main_course',
-      available: true,
-      isSpecial: false
-    },
-    {
-      name: 'Beef Burger',
-      description: 'Angus beef patty with lettuce, tomato, and cheese',
-      price: 12.95,
-      category: 'main_course',
-      available: true,
-      isSpecial: false
-    },
-    {
-      name: 'Chicken Alfredo',
-      description: 'Fettuccine pasta with creamy alfredo sauce and grilled chicken',
-      price: 14.95,
+      name: 'Final Boss Burger',
+      description: 'Double beef, bacon, cheddar, and secret "rage quit" sauce (can be replaced with another choice of sauce)',
+      price: 14.99,
       category: 'main_course',
       available: true,
       isSpecial: true
     },
     {
-      name: 'Vegetable Stir Fry',
-      description: 'Mixed vegetables with tofu in a savory sauce',
-      price: 13.95,
+      name: 'The NPC Classic',
+      description: 'Simple cheeseburger for those who just follow the main quest',
+      price: 10.99,
+      category: 'main_course',
+      available: true,
+      isSpecial: false
+    },
+    {
+      name: 'Side Quest Chicken Sandwich',
+      description: 'Crispy chicken with legendary aioli',
+      price: 11.99,
+      category: 'main_course',
+      available: true,
+      isSpecial: false
+    },
+    {
+      name: 'Veggie Villager Wrap',
+      description: 'Grilled veggies, hummus, and XP-infused dressing',
+      price: 10.99,
+      category: 'main_course',
+      available: true,
+      isSpecial: false
+    },
+    
+    // Entrées
+    {
+      name: 'Master Sword Steak',
+      description: '12oz ribeye with Triforce butter',
+      price: 22.99,
+      category: 'main_course',
+      available: true,
+      isSpecial: true
+    },
+    {
+      name: 'Koopa Carbonara',
+      description: 'Creamy pasta with crispy bacon & Parmesan',
+      price: 13.99,
+      category: 'main_course',
+      available: true,
+      isSpecial: false
+    },
+    {
+      name: 'Chocobo Fried Chicken',
+      description: 'Golden-fried chicken served with phoenix down sauce (Our inhouse BBQ Sauce)',
+      price: 14.99,
+      category: 'main_course',
+      available: true,
+      isSpecial: false
+    },
+    {
+      name: 'Red Shell Ribs',
+      description: 'BBQ ribs that never miss the flavor mark',
+      price: 18.99,
       category: 'main_course',
       available: true,
       isSpecial: false
@@ -164,25 +198,25 @@ const createSampleMenuItems = async (): Promise<void> => {
     
     // Sides
     {
-      name: 'French Fries',
-      description: 'Crispy golden fries',
-      price: 3.95,
+      name: 'Golden Fries',
+      description: 'Extra crispy with pixelated perfection',
+      price: 4.99,
       category: 'side',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Onion Rings',
-      description: 'Battered and fried onion rings',
-      price: 4.95,
+      name: 'Mana Mac & Cheese',
+      description: 'Ultra cheesy goodness for spellcasters',
+      price: 5.99,
       category: 'side',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Side Salad',
-      description: 'Mixed greens with house dressing',
-      price: 4.95,
+      name: '8-Bit Onion Rings',
+      description: 'Crunchy and addictive, just like a classic arcade game',
+      price: 5.99,
       category: 'side',
       available: true,
       isSpecial: false
@@ -190,25 +224,25 @@ const createSampleMenuItems = async (): Promise<void> => {
     
     // Desserts
     {
-      name: 'Chocolate Cake',
-      description: 'Rich chocolate cake with vanilla ice cream',
-      price: 6.95,
+      name: 'Pixel Pie',
+      description: 'Classic apple pie with a digital twist (a secret recipe created by the original Willy "Game Over" Witchell)',
+      price: 6.99,
       category: 'dessert',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Cheesecake',
-      description: 'New York style cheesecake with berry compote',
-      price: 7.95,
+      name: 'Loot Crate Lava Cake',
+      description: 'Chocolate explosion of sweetness',
+      price: 7.99,
       category: 'dessert',
       available: true,
       isSpecial: true
     },
     {
-      name: 'Apple Pie',
-      description: 'Warm apple pie with caramel sauce',
-      price: 6.95,
+      name: 'Starman Sundae',
+      description: 'Vanilla ice cream, sprinkles, and invincibility',
+      price: 5.99,
       category: 'dessert',
       available: true,
       isSpecial: false
@@ -216,33 +250,33 @@ const createSampleMenuItems = async (): Promise<void> => {
     
     // Drinks
     {
-      name: 'Soda',
-      description: 'Assorted soft drinks',
-      price: 2.50,
+      name: 'Mana Potion',
+      description: 'Blue Raspberry Slush',
+      price: 3.99,
       category: 'drink',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Iced Tea',
-      description: 'Sweetened or unsweetened',
-      price: 2.50,
+      name: 'Health Potion',
+      description: 'Strawberry Lemonade',
+      price: 3.99,
       category: 'drink',
       available: true,
       isSpecial: false
     },
     {
-      name: 'Coffee',
-      description: 'Regular or decaf',
-      price: 2.95,
+      name: 'Final Fantasy Float',
+      description: 'Root Beer & Ice Cream',
+      price: 4.99,
       category: 'drink',
       available: true,
-      isSpecial: false
+      isSpecial: true
     },
     {
-      name: 'Chocolate Milkshake',
-      description: 'Rich chocolate milkshake with whipped cream',
-      price: 4.95,
+      name: 'Soda with Free Refills',
+      description: 'Choose from: Mana Mist, Health Tonic, Mountain Doom, Red Ring Rush, Nuka Fizz, and more',
+      price: 1.99,
       category: 'drink',
       available: true,
       isSpecial: false
