@@ -454,7 +454,7 @@ export class MongoDBStorage implements IStorage {
 }
 
 // Using MongoDB connection string as specified in the requirements
-// Use environment variable for MongoDB URI with a fallback for development
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/restaurant_pos";
+// Use environment variable for MongoDB URI with a fallback
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://asoni24:admin@cluster0.mpqcvei.mongodb.net/";
 
 export const storage = new MongoDBStorage(MONGODB_URI);
