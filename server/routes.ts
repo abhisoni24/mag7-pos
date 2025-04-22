@@ -27,32 +27,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/auth/profile", authenticate, authController.getProfile);
   
   // Table routes
-  apiRouter.get("/tables", authenticate, tableController.getTables);
-  apiRouter.get("/tables/:id", authenticate, tableController.getTable);
-  apiRouter.post("/tables", authenticate, isManager, tableController.createTable);
-  apiRouter.put("/tables/:id", authenticate, tableController.updateTable);
+  apiRouter.get("/tables", authenticate, tableController.getTables); // All staff can view tables
+  apiRouter.get("/tables/:id", authenticate, tableController.getTable); // All staff can view table details
+  apiRouter.post("/tables", authenticate, isManager, tableController.createTable); // Only managers can create tables
+  apiRouter.put("/tables/:id", authenticate, tableController.updateTable); // All staff can update table status (Host marks as occupied/available)
+  
+  // Separate route for assigning waiters to tables (Manager function)
+  apiRouter.put("/tables/:id/assign", authenticate, isManager, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { waiterId } = req.body;
+      
+      // Update the table with the assigned waiter
+      const updatedTable = await storage.updateTable(id, { waiterId });
+      
+      if (!updatedTable) {
+        return res.status(404).json({ message: 'Table not found' });
+      }
+      
+      res.json({ table: updatedTable });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+    }
+  });
   
   // Menu routes
-  apiRouter.get("/menu", authenticate, menuController.getMenuItems);
-  apiRouter.get("/menu/:id", authenticate, menuController.getMenuItem);
-  apiRouter.post("/menu", authenticate, isManager, menuController.createMenuItem);
-  apiRouter.put("/menu/:id", authenticate, isManager, menuController.updateMenuItem);
-  apiRouter.delete("/menu/:id", authenticate, isManager, menuController.deleteMenuItem);
+  apiRouter.get("/menu", authenticate, menuController.getMenuItems); // All staff can view menu
+  apiRouter.get("/menu/:id", authenticate, menuController.getMenuItem); // All staff can view menu item details
+  apiRouter.post("/menu", authenticate, isManager, menuController.createMenuItem); // Only managers can add menu items
+  apiRouter.put("/menu/:id", authenticate, isManager, menuController.updateMenuItem); // Only managers can update menu items
+  apiRouter.delete("/menu/:id", authenticate, isManager, menuController.deleteMenuItem); // Only managers can delete menu items
+  
+  // Special route for marking menu items as specials (Manager function)
+  apiRouter.put("/menu/:id/special", authenticate, isManager, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isSpecial, price } = req.body;
+      
+      // Update the menu item
+      const updatedItem = await storage.updateMenuItem(id, { isSpecial, price });
+      
+      if (!updatedItem) {
+        return res.status(404).json({ message: 'Menu item not found' });
+      }
+      
+      res.json({ menuItem: updatedItem });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+    }
+  });
   
   // Order routes
-  apiRouter.get("/orders", authenticate, orderController.getOrders);
-  apiRouter.get("/orders/:id", authenticate, orderController.getOrder);
-  apiRouter.post("/orders", authenticate, orderController.createOrder);
-  apiRouter.put("/orders/:id/status", authenticate, orderController.updateOrderStatus);
-  apiRouter.post("/orders/:id/items", authenticate, orderController.addItemToOrder);
-  apiRouter.put("/orders/:orderId/items/:itemId", authenticate, orderController.updateOrderItem);
+  apiRouter.get("/orders", authenticate, orderController.getOrders); // All staff can view orders
+  apiRouter.get("/orders/:id", authenticate, orderController.getOrder); // All staff can view order details
+  apiRouter.post("/orders", authenticate, orderController.createOrder); // Waiters can create orders
+  
+  // Restricted route for updating order status (Only Chef can mark as in-progress/done)
+  apiRouter.put("/orders/:id/status", authenticate, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      // If updating to in-progress or done, only chef or higher can do it
+      if ((status === 'in-progress' || status === 'done') && 
+          req.user && req.user.role !== UserRole.CHEF && 
+          !['manager', 'owner', 'admin'].includes(req.user.role)) {
+        return res.status(403).json({ 
+          message: 'Only chefs, managers, or owners can update order status to in-progress or done' 
+        });
+      }
+      
+      const order = await orderController.updateOrderStatus(req, res);
+      return order;
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+    }
+  });
+  
+  apiRouter.post("/orders/:id/items", authenticate, orderController.addItemToOrder); // Waiters can add items to orders
+  apiRouter.put("/orders/:orderId/items/:itemId", authenticate, orderController.updateOrderItem); // Waiters can update order items
   
   // Staff routes
-  apiRouter.get("/staff", authenticate, isManager, staffController.getStaff);
-  apiRouter.get("/staff/:id", authenticate, isManager, staffController.getStaffMember);
-  apiRouter.post("/staff", authenticate, isManager, staffController.createStaffMember);
-  apiRouter.put("/staff/:id", authenticate, isManager, staffController.updateStaffMember);
-  apiRouter.delete("/staff/:id", authenticate, isManager, staffController.deleteStaffMember);
+  apiRouter.get("/staff", authenticate, isManager, staffController.getStaff); // Managers and up can view staff
+  apiRouter.get("/staff/:id", authenticate, isManager, staffController.getStaffMember); // Managers and up can view staff details
+  
+  // Create staff members - with role validation
+  apiRouter.post("/staff", authenticate, isManager, async (req, res) => {
+    try {
+      const userData = req.body;
+      
+      // If creating a manager, only owner or admin can do it
+      if (userData.role === UserRole.MANAGER && 
+          req.user && req.user.role !== UserRole.OWNER && 
+          req.user.role !== UserRole.ADMIN) {
+        return res.status(403).json({ 
+          message: 'Only owners or admins can create manager accounts' 
+        });
+      }
+      
+      // If creating lower level staff, managers can do it
+      return staffController.createStaffMember(req, res);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+    }
+  });
+  
+  // Update staff members - with role validation
+  apiRouter.put("/staff/:id", authenticate, isManager, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      // Get current staff member to check role
+      const currentStaff = await storage.getUser(id);
+      
+      // If target is a manager or being promoted to manager, only owner/admin can modify
+      if ((currentStaff && currentStaff.role === UserRole.MANAGER) || updates.role === UserRole.MANAGER) {
+        if (req.user && req.user.role !== UserRole.OWNER && req.user.role !== UserRole.ADMIN) {
+          return res.status(403).json({ 
+            message: 'Only owners or admins can modify manager accounts' 
+          });
+        }
+      }
+      
+      // For other staff, managers can update
+      return staffController.updateStaffMember(req, res);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+    }
+  });
+  
+  // Delete staff members - with role validation
+  apiRouter.delete("/staff/:id", authenticate, isManager, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get current staff member to check role
+      const currentStaff = await storage.getUser(id);
+      
+      // If target is a manager, only owner/admin can delete
+      if (currentStaff && currentStaff.role === UserRole.MANAGER) {
+        if (req.user && req.user.role !== UserRole.OWNER && req.user.role !== UserRole.ADMIN) {
+          return res.status(403).json({ 
+            message: 'Only owners or admins can delete manager accounts' 
+          });
+        }
+      }
+      
+      // For other staff, managers can delete
+      return staffController.deleteStaffMember(req, res);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+    }
+  });
   
   // Report routes
   apiRouter.get("/reports/item-frequency", authenticate, isOwner, reportController.getItemOrderFrequency);
@@ -81,6 +232,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Order is already paid' });
       }
       
+      // Get table information to check assigned waiter
+      const table = await storage.getTable(order.tableId);
+      
+      // Permission check: Only the assigned waiter, managers, or owners can process payments
+      if (req.user) {
+        const isHigherRole = ['manager', 'owner', 'admin'].includes(req.user.role);
+        const isAssignedWaiter = table && table.waiterId === req.user.id;
+        
+        if (!isHigherRole && !isAssignedWaiter) {
+          return res.status(403).json({ 
+            message: 'Only the assigned waiter, managers, or owners can process payments' 
+          });
+        }
+      }
+      
+      // Validate payment method is cash (waiters can only accept cash)
+      if (req.user && req.user.role === UserRole.WAITER && paymentMethod !== 'cash') {
+        return res.status(400).json({
+          message: 'Waiters can only accept cash payments'
+        });
+      }
+      
       // Create payment
       const payment = await storage.createPayment({
         orderId,
@@ -89,12 +262,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentMethod
       });
       
+      // Update order status to paid
+      await storage.updateOrderStatus(orderId, 'paid');
+      
       // Update table status if this was the last order for the table
       const tableOrders = await storage.getOrdersByTable(order.tableId);
       const unpaidOrders = tableOrders.filter(o => o.status !== 'paid' && o._id !== orderId);
       
       if (unpaidOrders.length === 0) {
-        // Check if we should clear the table
+        // Mark table as available
         await storage.updateTable(order.tableId, { status: 'available', waiterId: undefined, guestCount: undefined });
       }
       
