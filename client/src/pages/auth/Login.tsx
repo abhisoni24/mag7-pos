@@ -1,10 +1,17 @@
+/**
+ * Login Component
+ * 
+ * This component handles user authentication for the Restaurant POS system.
+ * It provides separate login flows for staff and admin users.
+ * 
+ * @module Login
+ */
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { UserRole } from '@shared/schema';
 import { login } from '../../redux/authSlice';
@@ -12,25 +19,33 @@ import { AppDispatch, RootState } from '../../redux/store';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
+/**
+ * Login functional component
+ * Handles user authentication and redirection based on user role
+ * 
+ * @returns {JSX.Element} The login component
+ */
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
   const [isStaffLogin, setIsStaffLogin] = useState(true);
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
 
-  const handleRoleChange = (selectedRole: string) => {
-    setRole(selectedRole);
-  };
-
+  /**
+   * Handles form submission
+   * Authenticates user and redirects to appropriate dashboard based on user role
+   * 
+   * @param {React.FormEvent} e - Form event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const response = await dispatch(login({ email, password, role })).unwrap();
+      // Log in without specifying role - the backend will return the user with their actual role
+      const response = await dispatch(login({ email, password })).unwrap();
       
       // Redirect based on user role
       switch (response.user.role) {
@@ -65,9 +80,12 @@ const Login = () => {
     }
   };
 
+  /**
+   * Toggle between staff and admin login forms
+   * Redirects to admin login page for admin login
+   */
   const handleToggleLoginType = () => {
     setIsStaffLogin(!isStaffLogin);
-    setRole('');
     if (!isStaffLogin) {
       navigate('/admin');
     }
@@ -130,24 +148,6 @@ const Login = () => {
                   required
                 />
               </div>
-              
-              {isStaffLogin && (
-                <div>
-                  <Label htmlFor="role">Select Role</Label>
-                  <Select value={role} onValueChange={handleRoleChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={UserRole.HOST}>Host</SelectItem>
-                      <SelectItem value={UserRole.WAITER}>Waiter</SelectItem>
-                      <SelectItem value={UserRole.CHEF}>Chef</SelectItem>
-                      <SelectItem value={UserRole.MANAGER}>Manager</SelectItem>
-                      <SelectItem value={UserRole.OWNER}>Owner</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
             </div>
             
             <Button 
