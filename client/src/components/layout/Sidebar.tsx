@@ -160,19 +160,19 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="bg-gray-800 text-white w-64 flex-shrink-0 h-full hidden md:block">
-        <div className="p-4 bg-gray-900">
+      <div className="bg-slate-900 dark:bg-slate-950 text-white w-64 flex-shrink-0 h-full hidden md:block">
+        <div className="p-4 bg-slate-950 dark:bg-black">
           <h1 className="text-xl font-poppins font-semibold">Restaurant POS</h1>
         </div>
         
-        <div className="user-info p-4 border-b border-gray-700">
+        <div className="user-info p-4 border-b border-slate-700 dark:border-slate-800">
           <div className="flex items-center">
             <div className={`w-10 h-10 rounded-full ${getRoleColorClass(user?.role)} flex items-center justify-center text-lg font-medium mr-3`}>
               {user?.name ? getInitials(user.name) : 'U'}
             </div>
             <div>
               <p className="font-medium">{user?.name || 'User'}</p>
-              <p className="text-sm text-gray-400">{user?.role || 'Guest'}</p>
+              <p className="text-sm text-slate-400 dark:text-slate-500">{user?.role || 'Guest'}</p>
             </div>
           </div>
         </div>
@@ -180,12 +180,12 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
         <nav className="py-4">
           <ul>
             {filteredNavItems.map((item) => (
-              <li key={item.path} className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
+              <li key={item.path} className="px-4 py-2 hover:bg-slate-800 dark:hover:bg-slate-900 cursor-pointer">
                 <a 
                   href={item.path} 
                   className={cn(
                     "flex items-center",
-                    location === item.path ? "text-white" : "text-gray-300"
+                    location === item.path ? "text-white" : "text-slate-300 dark:text-slate-400"
                   )}
                   onClick={(e) => {
                     e.preventDefault();
@@ -200,10 +200,10 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
           </ul>
         </nav>
         
-        <div className="mt-auto p-4 border-t border-gray-700">
+        <div className="mt-auto p-4 border-t border-slate-700 dark:border-slate-800">
           <Button 
             variant="ghost" 
-            className="w-full py-2 text-center text-gray-300 hover:text-white"
+            className="w-full py-2 text-center text-slate-300 dark:text-slate-400 hover:text-white"
             onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4" /> Logout
@@ -214,36 +214,36 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
       {/* Mobile Sidebar */}
       <div 
         className={cn(
-          "fixed inset-0 bg-gray-900 bg-opacity-50 z-20 md:hidden transition-opacity duration-200",
+          "fixed inset-0 bg-slate-900 dark:bg-slate-950 bg-opacity-50 z-20 md:hidden transition-opacity duration-200",
           isMobileSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setIsMobileSidebarOpen(false)}
       >
         <div 
           className={cn(
-            "bg-gray-800 text-white w-64 h-full overflow-y-auto transform transition-transform duration-200",
+            "bg-slate-900 dark:bg-slate-950 text-white w-64 h-full overflow-y-auto transform transition-transform duration-200",
             isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-4 bg-gray-900 flex justify-between items-center">
+          <div className="p-4 bg-slate-950 dark:bg-black flex justify-between items-center">
             <h1 className="text-xl font-poppins font-semibold">Restaurant POS</h1>
             <button 
-              className="text-gray-400 hover:text-white"
+              className="text-slate-400 dark:text-slate-500 hover:text-white"
               onClick={() => setIsMobileSidebarOpen(false)}
             >
               <ChevronRight />
             </button>
           </div>
           
-          <div className="user-info p-4 border-b border-gray-700">
+          <div className="user-info p-4 border-b border-slate-700 dark:border-slate-800">
             <div className="flex items-center">
               <div className={`w-10 h-10 rounded-full ${getRoleColorClass(user?.role)} flex items-center justify-center text-lg font-medium mr-3`}>
                 {user?.name ? getInitials(user.name) : 'U'}
               </div>
               <div>
                 <p className="font-medium">{user?.name || 'User'}</p>
-                <p className="text-sm text-gray-400">{user?.role || 'Guest'}</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500">{user?.role || 'Guest'}</p>
               </div>
             </div>
           </div>
@@ -251,12 +251,12 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
           <nav className="py-4">
             <ul>
               {filteredNavItems.map((item) => (
-                <li key={item.path} className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
+                <li key={item.path} className="px-4 py-2 hover:bg-slate-800 dark:hover:bg-slate-900 cursor-pointer">
                   <a 
                     href={item.path} 
                     className={cn(
                       "flex items-center",
-                      location === item.path ? "text-white" : "text-gray-300"
+                      location === item.path ? "text-white" : "text-slate-300 dark:text-slate-400"
                     )}
                     onClick={(e) => {
                       e.preventDefault();
@@ -271,10 +271,10 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
             </ul>
           </nav>
           
-          <div className="mt-auto p-4 border-t border-gray-700">
+          <div className="mt-auto p-4 border-t border-slate-700 dark:border-slate-800">
             <Button 
               variant="ghost" 
-              className="w-full py-2 text-center text-gray-300 hover:text-white"
+              className="w-full py-2 text-center text-slate-300 dark:text-slate-400 hover:text-white"
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" /> Logout

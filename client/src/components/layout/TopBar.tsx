@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { Button } from '@/components/ui/button';
 import { Bell, Clock, Menu } from 'lucide-react';
+import { ThemeToggle } from '../theme/ThemeToggle';
 
 interface TopBarProps {
   pageTitle: string;
@@ -31,30 +32,32 @@ const TopBar = ({ pageTitle, toggleMobileSidebar }: TopBarProps) => {
   }
 
   return (
-    <div className="bg-white border-b shadow-sm p-4 flex justify-between items-center">
+    <div className="bg-background border-b shadow-sm p-4 flex justify-between items-center">
       <div className="flex items-center">
         <button 
-          className="mr-4 md:hidden text-gray-600 hover:text-gray-900"
+          className="mr-4 md:hidden text-muted-foreground hover:text-foreground"
           onClick={toggleMobileSidebar}
         >
           <Menu className="h-6 w-6" />
         </button>
-        <h2 className="text-xl font-poppins font-semibold text-gray-800">{pageTitle}</h2>
+        <h2 className="text-xl font-poppins font-semibold text-foreground">{pageTitle}</h2>
       </div>
       
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <div className="hidden md:flex items-center mr-4">
-          <Clock className="mr-2 h-5 w-5 text-gray-600" />
+          <Clock className="mr-2 h-5 w-5 text-muted-foreground" />
           <span className="text-sm font-medium">{currentTime}</span>
         </div>
+        
+        <ThemeToggle />
         
         <Button 
           variant="ghost" 
           size="icon" 
-          className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600"
+          className="relative p-2 rounded-full hover:bg-accent text-muted-foreground"
         >
           <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 bg-error w-2 h-2 rounded-full"></span>
+          <span className="absolute top-1 right-1 bg-destructive w-2 h-2 rounded-full"></span>
         </Button>
       </div>
     </div>
