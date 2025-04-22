@@ -129,7 +129,7 @@ const MenuManagement = () => {
       const menuItemData = {
         name: formData.name,
         description: formData.description,
-        price: parseFloat(formData.price),
+        price: formData.price, // Keep it as a string to match the backend expectation
         category: formData.category,
         available: formData.available,
         isSpecial: formData.isSpecial
@@ -245,7 +245,7 @@ const MenuManagement = () => {
                         <TableRow key={item._id}>
                           <TableCell className="font-medium">{item.name}</TableCell>
                           <TableCell>{item.description || '-'}</TableCell>
-                          <TableCell>${item.price.toFixed(2)}</TableCell>
+                          <TableCell>${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</TableCell>
                           <TableCell>
                             {item.available ? (
                               <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Yes</span>
