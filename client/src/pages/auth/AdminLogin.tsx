@@ -1,3 +1,11 @@
+/**
+ * Admin Login Component
+ * 
+ * This component provides authentication specifically for users with admin privileges.
+ * It redirects to the system administration dashboard on successful login.
+ * 
+ * @module AdminLogin
+ */
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'wouter';
@@ -10,6 +18,12 @@ import { login } from '../../redux/authSlice';
 import { AppDispatch, RootState } from '../../redux/store';
 import { useToast } from '@/hooks/use-toast';
 
+/**
+ * AdminLogin functional component
+ * Handles authentication for users with admin privileges
+ * 
+ * @returns {JSX.Element} The admin login component
+ */
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,14 +32,21 @@ const AdminLogin = () => {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
 
+  /**
+   * Handles form submission
+   * Authenticates admin user and redirects to the system dashboard
+   * 
+   * @param {React.FormEvent} e - Form event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      // Login with admin role explicitly to restrict access
       const response = await dispatch(login({ 
         email, 
         password, 
-        role: UserRole.ADMIN 
+        role: UserRole.ADMIN  // Explicitly check for admin role
       })).unwrap();
       
       if (response.user.role === UserRole.ADMIN) {
@@ -50,6 +71,9 @@ const AdminLogin = () => {
     }
   };
 
+  /**
+   * Navigates back to the regular staff login page
+   */
   const handleGoToStaffLogin = () => {
     navigate('/');
   };

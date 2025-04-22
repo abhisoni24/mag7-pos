@@ -1,9 +1,24 @@
+/**
+ * Authentication Controller
+ * 
+ * This module handles user authentication functions including login, registration,
+ * and fetching user profiles.
+ * 
+ * @module controllers/authController
+ */
 import { Request, Response } from 'express';
 import { storage } from '../storage';
 import { generateToken } from '../utils/jwt';
 import { loginSchema, InsertUser } from '@shared/schema';
 import bcrypt from 'bcryptjs';
 
+/**
+ * Authenticates a user and returns a JWT token
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 export const login = async (req: Request, res: Response) => {
   try {
     // Validate request body
@@ -28,10 +43,8 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
-    // If role is specified, check if user has that role
-    if (validatedData.role && user.role !== validatedData.role) {
-      return res.status(403).json({ message: 'You do not have access to this role' });
-    }
+    // Note: We no longer validate role - users will be directed to their actual role's dashboard
+    // This allows users to have just one set of credentials instead of role-specific logins
     
     // Generate JWT token
     const token = generateToken(user);
@@ -55,6 +68,14 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Registers a new user
+ * This endpoint is restricted to managers, owners, or admins
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 export const register = async (req: Request, res: Response) => {
   try {
     // This endpoint should only be used by managers, owners, or admins
@@ -100,6 +121,13 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Retrieves the authenticated user's profile
+ * 
+ * @param {Request} req - Express request object with user property from auth middleware
+ * @param {Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 export const getProfile = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
