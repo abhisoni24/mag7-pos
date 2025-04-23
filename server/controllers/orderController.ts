@@ -62,23 +62,43 @@ export const createOrder = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Cannot create order for a table that is not occupied' });
     }
     
-    // Create new order
-    const newOrder: InsertOrder = {
-      tableId,
-      waiterId: waiterId || table.waiterId,
-      status: OrderStatus.NEW
-    };
+    // Check if there's an existing active order for this table
+    // Active orders: NEW, IN_PROGRESS, DONE, DELIVERED (not PAID or CANCELLED)
+    const tableOrders = await storage.getOrdersByTable(tableId);
+    const activeOrder = tableOrders.find(order => 
+      order.status === OrderStatus.NEW || 
+      order.status === OrderStatus.IN_PROGRESS || 
+      order.status === OrderStatus.DONE || 
+      order.status === OrderStatus.DELIVERED
+    );
     
-    const createdOrder = await storage.createOrder(newOrder);
+    let orderId: string;
+    let createdOrder;
+    
+    if (activeOrder) {
+      // Use existing order
+      orderId = activeOrder._id as string;
+      createdOrder = activeOrder;
+    } else {
+      // Create new order
+      const newOrder: InsertOrder = {
+        tableId,
+        waiterId: waiterId || table.waiterId,
+        status: OrderStatus.NEW
+      };
+      
+      createdOrder = await storage.createOrder(newOrder);
+      orderId = createdOrder._id as string;
+    }
     
     // Add items to the order if provided
     if (items && Array.isArray(items) && items.length > 0) {
       for (const item of items) {
-        await storage.addItemToOrder(createdOrder._id as string, item);
+        await storage.addItemToOrder(orderId, item);
       }
       
       // Refresh order with items
-      const updatedOrder = await storage.getOrder(createdOrder._id as string);
+      const updatedOrder = await storage.getOrder(orderId);
       res.status(201).json({ order: updatedOrder });
     } else {
       res.status(201).json({ order: createdOrder });

@@ -127,7 +127,7 @@ const Orders = () => {
         <CreateOrderModal
           isOpen={showOrderDetails}
           onClose={handleCloseOrderDetails}
-          table={selectedOrder ? tables.find(table => table._id === selectedOrder.tableId) : null}
+          table={selectedOrder ? tables.find(table => table._id === selectedOrder.tableId) || null : null}
           existingOrder={selectedOrder}
         />
       )}
