@@ -87,10 +87,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Order routes
   apiRouter.get("/orders", authenticate, checkPermission('orders'), async (req, res) => {
-    // If the user is a waiter, automatically filter orders by their ID
-    if (req.user && req.user.role === UserRole.WAITER) {
-      req.query.waiterId = req.user.id;
-    }
+    // Allow waiters to see all orders (removed the filtering)
+    // Only filter if they explicitly requested their own orders
     return orderController.getOrders(req, res);
   }); // All staff with orders permission can view orders
   apiRouter.get("/orders/:id", authenticate, checkPermission('orders'), orderController.getOrder); // All staff with orders permission can view order details
