@@ -97,7 +97,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status } = req.body;
       
       // First check if the user has basic orders permission
-      if (!hasPermission(req.user?.role || '', 'orders')) {
+      if (req.user && (
+          req.user.role === UserRole.WAITER || 
+          req.user.role === UserRole.CHEF || 
+          req.user.role === UserRole.MANAGER || 
+          req.user.role === UserRole.OWNER || 
+          req.user.role === UserRole.ADMIN)) {
+        // These roles can manage orders
+      } else {
         return res.status(403).json({ 
           message: 'Access denied. You do not have permission to manage orders.' 
         });

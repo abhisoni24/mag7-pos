@@ -12,7 +12,7 @@ const roleHierarchy: Record<string, number> = {
 };
 
 // Role-specific permissions matrix
-const rolePermissions: Record<string, string[]> = {
+export const rolePermissions: Record<string, string[]> = {
   [UserRole.HOST]: ['tables', 'menu', 'view_staff'],
   [UserRole.WAITER]: ['tables', 'menu', 'orders', 'payments'],
   [UserRole.CHEF]: ['orders', 'menu'],
