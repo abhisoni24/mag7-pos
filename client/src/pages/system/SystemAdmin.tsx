@@ -507,7 +507,7 @@ const SystemAdmin = () => {
                     <Label htmlFor="restaurant-name">Restaurant Name</Label>
                     <Input
                       id="restaurant-name"
-                      defaultValue="Restaurant POS"
+                      defaultValue="Mag7 POS"
                       className="mt-1"
                     />
                   </div>
