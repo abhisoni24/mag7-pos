@@ -34,12 +34,7 @@ const Orders = () => {
   }, [dispatch, user]);
   
   const filteredOrders = orders.filter(order => {
-    // If user is a waiter, only show their assigned orders
-    if (user?.role === 'waiter') {
-      if (order.waiterId !== user.id) return false;
-    }
-    
-    // Filter by tab
+    // Filter by tab - no need to filter by waiter ID here since we already do it in API call
     if (activeTab === 'all') return true;
     if (activeTab === 'new') return order.status === OrderStatus.NEW;
     if (activeTab === 'in_progress') return order.status === OrderStatus.IN_PROGRESS;

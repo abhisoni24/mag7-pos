@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
-import { Check, Clock, CreditCard, MoreHorizontal } from 'lucide-react';
+import { Check, Clock, CreditCard, MoreHorizontal, DollarSign } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface OrderItemProps {
   order: Order;
@@ -24,6 +32,9 @@ interface OrderItemProps {
 }
 
 const OrderItem = ({ order, table, onViewDetails, onUpdateStatus }: OrderItemProps) => {
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [tipAmount, setTipAmount] = useState(0);
+  
   // Calculate total order amount
   const calculateTotal = (items: OrderItemType[]): number => {
     return items.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -192,14 +203,83 @@ const OrderItem = ({ order, table, onViewDetails, onUpdateStatus }: OrderItemPro
           {order.status === OrderStatus.DELIVERED && (
             <Button 
               size="sm"
-              className="flex-1"
-              onClick={() => onUpdateStatus(OrderStatus.PAID)}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => setShowPaymentDialog(true)}
             >
-              <CreditCard className="h-4 w-4 mr-1" /> Pay
+              <DollarSign className="h-4 w-4 mr-1" /> Take Cash Payment
             </Button>
           )}
         </div>
       </CardContent>
+      
+      {/* Cash Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Process Cash Payment</DialogTitle>
+            <DialogDescription>
+              Collect the following amount from the customer.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-sm font-medium">Subtotal:</div>
+                <div className="text-sm text-right">${total.toFixed(2)}</div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 items-center">
+                <div className="text-sm font-medium">Tip:</div>
+                <div className="flex gap-1">
+                  <Button 
+                    variant={tipAmount === 0 ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setTipAmount(0)}
+                    className="flex-1 text-xs"
+                  >
+                    None
+                  </Button>
+                  <Button 
+                    variant={tipAmount === Math.round(total * 0.15 * 100) / 100 ? "default" : "outline"}
+                    size="sm" 
+                    onClick={() => setTipAmount(Math.round(total * 0.15 * 100) / 100)}
+                    className="flex-1 text-xs"
+                  >
+                    15%
+                  </Button>
+                  <Button 
+                    variant={tipAmount === Math.round(total * 0.20 * 100) / 100 ? "default" : "outline"}
+                    size="sm" 
+                    onClick={() => setTipAmount(Math.round(total * 0.20 * 100) / 100)}
+                    className="flex-1 text-xs"
+                  >
+                    20%
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="border-t pt-2 grid grid-cols-2 gap-4">
+                <div className="text-base font-bold">Total Due:</div>
+                <div className="text-base font-bold text-right">${(total + tipAmount).toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>Cancel</Button>
+            <Button 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                onUpdateStatus(OrderStatus.PAID);
+                setShowPaymentDialog(false);
+              }}
+            >
+              Confirm Payment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
