@@ -2,18 +2,20 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrders, Order, OrderItem, updateOrderStatus } from '../../redux/orderSlice';
 import { fetchTables } from '../../redux/tableSlice';
+import { fetchStaff } from '../../redux/staffSlice';
 import { AppDispatch, RootState } from '../../redux/store';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { OrderStatus } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
-import { Clock, Utensils } from 'lucide-react';
+import { Clock, Utensils, User } from 'lucide-react';
 
 const Kitchen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { orders, loading } = useSelector((state: RootState) => state.orders);
   const { tables, loading: tablesLoading } = useSelector((state: RootState) => state.tables);
+  const { staff } = useSelector((state: RootState) => state.staff);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(true);
   const { toast } = useToast();
@@ -57,8 +59,9 @@ const Kitchen = () => {
         done: false
       });
       
-      // Fetch tables first
+      // Fetch tables and staff first
       await dispatch(fetchTables({})).unwrap();
+      await dispatch(fetchStaff('waiter')).unwrap();
       
       // Fetch orders in sequence to avoid race conditions
       await fetchOrdersByStatus(OrderStatus.NEW);

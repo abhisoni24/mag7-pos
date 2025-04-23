@@ -94,15 +94,22 @@ const Orders = () => {
             </Card>
           ) : sortedOrders.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sortedOrders.map(order => (
-                <OrderItem
-                  key={order._id}
-                  order={order}
-                  table={tables.find(table => table._id === order.tableId)}
-                  onViewDetails={() => handleViewOrderDetails(order)}
-                  onUpdateStatus={(status) => handleUpdateStatus(order, status)}
-                />
-              ))}
+              {sortedOrders.map(order => {
+                const assignedWaiter = order.waiterId 
+                  ? staff.find(s => s.id === order.waiterId) || null
+                  : null;
+                  
+                return (
+                  <OrderItem
+                    key={order._id}
+                    order={order}
+                    table={tables.find(table => table._id === order.tableId)}
+                    waiter={assignedWaiter}
+                    onViewDetails={() => handleViewOrderDetails(order)}
+                    onUpdateStatus={(status) => handleUpdateStatus(order, status)}
+                  />
+                );
+              })}
             </div>
           ) : (
             <Card>

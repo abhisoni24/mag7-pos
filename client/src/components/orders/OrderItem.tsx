@@ -28,11 +28,12 @@ import {
 interface OrderItemProps {
   order: Order;
   table?: Table;
+  waiter?: { id: string; name: string } | null;
   onViewDetails: () => void;
   onUpdateStatus: (status: string) => void;
 }
 
-const OrderItem = ({ order, table, onViewDetails, onUpdateStatus }: OrderItemProps) => {
+const OrderItem = ({ order, table, waiter, onViewDetails, onUpdateStatus }: OrderItemProps) => {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [tipAmount, setTipAmount] = useState(0);
   
@@ -160,9 +161,14 @@ const OrderItem = ({ order, table, onViewDetails, onUpdateStatus }: OrderItemPro
             <Clock className="h-4 w-4 mr-1" />
             <span>{timeAgo}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              Table {tableNumber}
+          <div className="flex justify-between">
+            <div className="text-sm text-gray-600 flex flex-col">
+              <div>Table {tableNumber}</div>
+              {order.waiterId && (
+                <div className="text-xs text-gray-500">
+                  Waiter: {waiter?.name || 'Assigned'}
+                </div>
+              )}
             </div>
             <div className="text-sm font-medium">${total.toFixed(2)}</div>
           </div>
