@@ -252,12 +252,11 @@ const TableDetailsModal = ({
           )}
           
           <div className="flex gap-2 pt-2">
+            {/* Always show Create Order for occupied tables */}
             {status === TableStatus.OCCUPIED && (
               <Button 
                 className="flex-1 bg-primary text-white hover:bg-primary-dark"
                 onClick={onCreateOrder}
-                // Allow waiter to create orders even if they can't change table status
-                disabled={!canChangeStatus && user?.role !== UserRole.WAITER}
               >
                 Create Order
               </Button>
@@ -272,7 +271,7 @@ const TableDetailsModal = ({
           <Button 
             onClick={handleSave}
             // Waiters can't save changes to table status
-            disabled={user?.role === UserRole.WAITER}
+            disabled={user?.role === 'waiter'}
           >
             Save Changes
           </Button>

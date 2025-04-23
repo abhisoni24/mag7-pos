@@ -46,12 +46,11 @@ const Tables = () => {
     return floorMatch && waiterMatch;
   });
   
-  // Only waiters should filter tables assigned to them by default
+  // Default setting for table filters
   useEffect(() => {
-    if (user && user.role === UserRole.WAITER) {
-      setSelectedWaiter(user.id);
-    }
-  }, [user]);
+    // Initially set to "all" for all users to make sure tables show up
+    setSelectedWaiter('all');
+  }, []);
   
   const handleTableClick = (table: TableType) => {
     setSelectedTable(table);
@@ -75,8 +74,11 @@ const Tables = () => {
   // Check if user is allowed to change table status
   const canChangeTableStatus = () => {
     // Let host and managers and above change table status completely
-    if (user && [UserRole.HOST, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN].includes(user.role)) {
-      return true;
+    if (user) {
+      const allowedRoles = ['host', 'manager', 'owner', 'admin'];
+      if (allowedRoles.includes(user.role)) {
+        return true;
+      }
     }
     
     // Waiters can access tables but not change status (they can create orders)
@@ -101,7 +103,7 @@ const Tables = () => {
             </Select>
           </div>
           
-          {(user?.role === UserRole.MANAGER || user?.role === UserRole.OWNER || user?.role === UserRole.HOST) && (
+          {user && ['manager', 'owner', 'host'].includes(user.role) && (
             <div>
               <Label htmlFor="waiter-select" className="mb-1">Filter by Waiter</Label>
               <Select value={selectedWaiter} onValueChange={setSelectedWaiter}>
