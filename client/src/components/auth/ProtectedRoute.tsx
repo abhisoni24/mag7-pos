@@ -58,28 +58,34 @@ const ProtectedRoute = ({ children, roles = [] }: ProtectedRouteProps) => {
   
   // Check if user is authenticated
   if (!isAuthenticated || !token) {
-    navigate('/');
+    // Use useEffect for navigation to avoid render loop
+    useEffect(() => {
+      navigate('/');
+    }, [navigate]);
     return null;
   }
   
   // Check if user has required role
   if (!hasRequiredRole()) {
-    toast({
-      variant: "destructive",
-      title: "Access denied",
-      description: "You don't have permission to access this page.",
-    });
-    
-    // Redirect to appropriate page based on user role
-    if (user?.role === 'host') {
-      navigate('/tables');
-    } else if (user?.role === 'chef') {
-      navigate('/kitchen');
-    } else if (user?.role === 'admin') {
-      navigate('/system');
-    } else {
-      navigate('/dashboard');
-    }
+    // Use useEffect for role-based redirects to avoid render loop
+    useEffect(() => {
+      toast({
+        variant: "destructive",
+        title: "Access denied",
+        description: "You don't have permission to access this page.",
+      });
+      
+      // Redirect to appropriate page based on user role
+      if (user?.role === 'host') {
+        navigate('/tables');
+      } else if (user?.role === 'chef') {
+        navigate('/kitchen');
+      } else if (user?.role === 'admin') {
+        navigate('/system');
+      } else {
+        navigate('/dashboard');
+      }
+    }, [navigate, toast, user]);
     
     return null;
   }
