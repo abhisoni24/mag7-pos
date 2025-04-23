@@ -17,19 +17,36 @@ const Kitchen = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const { toast } = useToast();
   
-  useEffect(() => {
+  // Fetch all orders with different statuses
+  const fetchAllKitchenOrders = () => {
+    console.log('Fetching kitchen orders...');
+    // Fetch all order statuses that chef needs to see
     dispatch(fetchOrders({ status: OrderStatus.NEW }));
     dispatch(fetchOrders({ status: OrderStatus.IN_PROGRESS }));
+    dispatch(fetchOrders({ status: OrderStatus.DONE }));
     dispatch(fetchTables({}));
+  };
+  
+  useEffect(() => {
+    // Fetch immediately on component mount
+    fetchAllKitchenOrders();
     
     // Set up polling for new orders
     const interval = setInterval(() => {
-      dispatch(fetchOrders({ status: OrderStatus.NEW }));
-      dispatch(fetchOrders({ status: OrderStatus.IN_PROGRESS }));
-    }, 30000); // Poll every 30 seconds
+      fetchAllKitchenOrders();
+    }, 15000); // Poll every 15 seconds
     
     return () => clearInterval(interval);
   }, [dispatch]);
+  
+  // Add a manual refresh function
+  const handleRefresh = () => {
+    fetchAllKitchenOrders();
+    toast({
+      title: "Refreshed",
+      description: "Kitchen display updated with latest orders",
+    });
+  };
   
   const incomingOrders = orders.filter(order => order.status === OrderStatus.NEW);
   const inProgressOrders = orders.filter(order => order.status === OrderStatus.IN_PROGRESS);
@@ -165,7 +182,22 @@ const Kitchen = () => {
   return (
     <div className="p-4 bg-gray-100">
       <div className="mb-4">
-        <h3 className="text-lg font-medium text-gray-800 mb-3">Incoming Orders</h3>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-lg font-medium text-gray-800">Incoming Orders</h3>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            className="flex items-center gap-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M3 21v-5h5" />
+            </svg>
+            Refresh
+          </Button>
+        </div>
         
         {loading ? (
           <div className="flex justify-center items-center h-40">

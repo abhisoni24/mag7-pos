@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchMenuItems, 
@@ -52,7 +52,13 @@ const CreateOrderModal = ({
     price: number | string;
     notes?: string;
   }[]>([]);
+  const [grossTotal, setGrossTotal] = useState(0);
+  const [taxAmount, setTaxAmount] = useState(0);
+  const [tipAmount, setTipAmount] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
+  
+  // Tax rate as a percentage (8.5%)
+  const TAX_RATE = 0.085;
   
   // Load menu items on mount
   useEffect(() => {
@@ -78,12 +84,22 @@ const CreateOrderModal = ({
   
   // Calculate total amount whenever order items change
   useEffect(() => {
-    const total = orderItems.reduce((sum, item) => {
+    // Calculate gross total (before tax)
+    const gross = orderItems.reduce((sum, item) => {
       const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
       return sum + (itemPrice * item.quantity);
     }, 0);
+    
+    // Calculate tax amount
+    const tax = gross * TAX_RATE;
+    
+    // Calculate final total (gross + tax + tip)
+    const total = gross + tax + tipAmount;
+    
+    setGrossTotal(gross);
+    setTaxAmount(tax);
     setTotalAmount(total);
-  }, [orderItems]);
+  }, [orderItems, tipAmount]);
   
   // Filter menu items based on category and search query
   const filteredMenuItems = menuItems.filter(item => {
@@ -97,6 +113,19 @@ const CreateOrderModal = ({
       (item.description && item.description.toLowerCase().includes(searchLower))
     );
   });
+  
+  // Reference to the scroll area container
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll to bottom of the order items list
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  };
   
   // Add item to order
   const handleAddItem = (item: MenuItem) => {
@@ -120,6 +149,9 @@ const CreateOrderModal = ({
         notes: ''
       }]);
     }
+    
+    // Scroll to bottom after state update
+    setTimeout(scrollToBottom, 100);
   };
   
   // Update item quantity
@@ -260,7 +292,7 @@ const CreateOrderModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-[85vw] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
             {existingOrder ? `Edit Order #${existingOrder._id?.substring(0, 4)}` : `New Order - ${table ? `Table ${table.number}` : ''}`}
@@ -337,7 +369,7 @@ const CreateOrderModal = ({
               <h4 className="font-medium mb-3">Current Order</h4>
               
               {orderItems.length > 0 ? (
-                <ScrollArea className="h-[calc(70vh-200px)] pr-2">
+                <ScrollArea className="h-[calc(70vh-200px)] pr-2" ref={scrollAreaRef}>
                   <div className="space-y-3">
                     {orderItems.map((item, index) => (
                       <div key={index} className="border rounded-md p-3">
@@ -403,9 +435,28 @@ const CreateOrderModal = ({
             </div>
             
             <div className="border-t border-gray-200 p-4">
-              <div className="flex justify-between mb-4 pt-2">
-                <span className="font-medium">Total:</span>
-                <span className="font-medium">${totalAmount.toFixed(2)}</span>
+              <div className="space-y-2 mb-4 pt-2">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal:</span>
+                  <span>${grossTotal.toFixed(2)}</span>
+                </div>
+                
+                <div className="flex justify-between text-sm">
+                  <span>Tax ({(TAX_RATE * 100).toFixed(1)}%):</span>
+                  <span>${taxAmount.toFixed(2)}</span>
+                </div>
+                
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span>Tip:</span>
+                    <span>${tipAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between font-medium pt-2 border-t border-gray-100">
+                  <span>Total:</span>
+                  <span>${totalAmount.toFixed(2)}</span>
+                </div>
               </div>
               
               <div className="flex gap-2">
