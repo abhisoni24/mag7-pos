@@ -131,9 +131,10 @@ const Kitchen = () => {
         status: OrderStatus.IN_PROGRESS
       })).unwrap();
       
+      const orderId = order._id ? order._id.substring(order._id.length - 4) : 'N/A';
       toast({
         title: "Order started",
-        description: `Order #${order._id?.substring(0, 4)} is now in progress`,
+        description: `Order #${orderId} is now in progress`,
       });
     } catch (error) {
       toast({
@@ -151,9 +152,10 @@ const Kitchen = () => {
         status: OrderStatus.DONE
       })).unwrap();
       
+      const orderId = order._id ? order._id.substring(order._id.length - 4) : 'N/A';
       toast({
         title: "Order completed",
-        description: `Order #${order._id?.substring(0, 4)} is now ready for delivery`,
+        description: `Order #${orderId} is now ready for delivery`,
       });
     } catch (error) {
       toast({
@@ -173,6 +175,10 @@ const Kitchen = () => {
     const tableNumber = getTableNumber(order.tableId);
     const timeElapsed = getTimeElapsed(order.createdAt);
     const orderItems = order.items;
+    const orderId = order._id ? order._id.substring(order._id.length - 4) : 'N/A';
+    const assignedWaiter = order.waiterId 
+      ? staff.find(s => s.id === order.waiterId) 
+      : null;
     
     const borderColor = status === 'new' ? 'border-blue-500' : 'border-warning';
     const statusBgColor = status === 'new' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800';
@@ -185,7 +191,7 @@ const Kitchen = () => {
       <Card key={order._id} className={`border-l-4 ${borderColor}`}>
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-3">
-            <span className="font-medium text-lg">Order #{order._id?.substring(0, 4)}</span>
+            <span className="font-medium text-lg">Order #{orderId}</span>
             <span className={`text-sm ${statusBgColor} py-1 px-2 rounded-full`}>{statusText}</span>
           </div>
           
@@ -196,6 +202,11 @@ const Kitchen = () => {
             <p className="text-sm text-gray-600">
               <Utensils className="inline-block w-4 h-4 mr-1" /> Table {tableNumber}
             </p>
+            {order.waiterId && (
+              <p className="text-xs text-gray-500">
+                <User className="inline-block w-3 h-3 mr-1" /> Waiter: {assignedWaiter?.name || 'Assigned'}
+              </p>
+            )}
           </div>
           
           <div className="space-y-2 mb-4">
@@ -296,10 +307,11 @@ const Kitchen = () => {
                   const startTime = new Date(order.createdAt);
                   const completeTime = new Date(order.updatedAt);
                   const timeTaken = Math.round((completeTime.getTime() - startTime.getTime()) / 60000); // in minutes
+                  const orderId = order._id ? order._id.substring(order._id.length - 4) : 'N/A';
                   
                   return (
                     <TableRow key={order._id} className="hover:bg-gray-50">
-                      <TableCell className="font-medium">#{order._id?.substring(0, 4)}</TableCell>
+                      <TableCell className="font-medium">#{orderId}</TableCell>
                       <TableCell>Table {getTableNumber(order.tableId)}</TableCell>
                       <TableCell>{order.items.length} items</TableCell>
                       <TableCell>{startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</TableCell>
@@ -328,7 +340,7 @@ const Kitchen = () => {
           <Card className="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-medium">
-                Order #{selectedOrder._id?.substring(0, 4)} Details
+                Order #{selectedOrder._id?.substring(selectedOrder._id.length - 4)} Details
               </h3>
               <Button 
                 variant="ghost" 
@@ -360,6 +372,12 @@ const Kitchen = () => {
                       <p className="text-sm text-gray-500">Last Updated</p>
                       <p>{new Date(selectedOrder.updatedAt).toLocaleString()}</p>
                     </div>
+                    {selectedOrder.waiterId && (
+                      <div>
+                        <p className="text-sm text-gray-500">Waiter</p>
+                        <p>{staff.find(s => s.id === selectedOrder.waiterId)?.name || 'Assigned'}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
