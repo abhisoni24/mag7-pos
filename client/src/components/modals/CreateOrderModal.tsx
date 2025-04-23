@@ -43,13 +43,13 @@ const CreateOrderModal = ({
   const { toast } = useToast();
   
   // Local state
-  const [activeCategory, setActiveCategory] = useState(MenuItemCategory.APPETIZER);
+  const [activeCategory, setActiveCategory] = useState<string>(MenuItemCategory.APPETIZER);
   const [searchQuery, setSearchQuery] = useState('');
   const [orderItems, setOrderItems] = useState<{
     menuItemId: string;
     name: string;
     quantity: number;
-    price: number;
+    price: number | string;
     notes?: string;
   }[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
@@ -78,7 +78,10 @@ const CreateOrderModal = ({
   
   // Calculate total amount whenever order items change
   useEffect(() => {
-    const total = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = orderItems.reduce((sum, item) => {
+      const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+      return sum + (itemPrice * item.quantity);
+    }, 0);
     setTotalAmount(total);
   }, [orderItems]);
   
@@ -310,7 +313,7 @@ const CreateOrderModal = ({
                       >
                         <div className="flex justify-between mb-1">
                           <h5 className="font-medium">{item.name}</h5>
-                          <span className="text-sm">${item.price.toFixed(2)}</span>
+                          <span className="text-sm">${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</span>
                         </div>
                         <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
                         {item.isSpecial && (
@@ -371,7 +374,12 @@ const CreateOrderModal = ({
                                 <Plus className="h-3 w-3" />
                               </Button>
                               <div className="ml-auto">
-                                <span className="text-sm">${(item.price * item.quantity).toFixed(2)}</span>
+                                <span className="text-sm">${
+                                  (typeof item.price === 'number' 
+                                    ? item.price * item.quantity 
+                                    : parseFloat(item.price) * item.quantity
+                                  ).toFixed(2)
+                                }</span>
                               </div>
                             </div>
                             
