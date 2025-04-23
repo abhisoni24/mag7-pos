@@ -86,7 +86,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Order routes
-  apiRouter.get("/orders", authenticate, checkPermission('orders'), orderController.getOrders); // All staff with orders permission can view orders
+  apiRouter.get("/orders", authenticate, checkPermission('orders'), async (req, res) => {
+    // If the user is a waiter, automatically filter orders by their ID
+    if (req.user && req.user.role === UserRole.WAITER) {
+      req.query.waiterId = req.user.id;
+    }
+    return orderController.getOrders(req, res);
+  }); // All staff with orders permission can view orders
   apiRouter.get("/orders/:id", authenticate, checkPermission('orders'), orderController.getOrder); // All staff with orders permission can view order details
   apiRouter.post("/orders", authenticate, checkPermission('orders'), orderController.createOrder); // Waiters and above can create orders
   

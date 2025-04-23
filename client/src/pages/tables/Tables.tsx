@@ -73,15 +73,14 @@ const Tables = () => {
   
   // Check if user is allowed to change table status
   const canChangeTableStatus = () => {
-    // Let host and managers and above change table status completely
+    // Let host, waiters, managers and above change table status completely
     if (user) {
-      const allowedRoles = ['host', 'manager', 'owner', 'admin'];
+      const allowedRoles = ['host', 'waiter', 'manager', 'owner', 'admin'];
       if (allowedRoles.includes(user.role)) {
         return true;
       }
     }
     
-    // Waiters can access tables but not change status (they can create orders)
     return false;
   };
 
