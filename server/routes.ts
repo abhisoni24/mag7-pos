@@ -136,8 +136,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return staffController.getStaff(req, res);
       }
       
-      // If user has 'view_staff' permission (host) and requesting waiters, allow it
-      if (hasPermission(req.user?.role || '', 'view_staff') && role === 'waiter') {
+      // If requesting only waiters, any authenticated user can see them
+      if (role === 'waiter') {
         return staffController.getStaff(req, res);
       }
       

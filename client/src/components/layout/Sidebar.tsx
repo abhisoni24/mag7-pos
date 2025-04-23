@@ -132,7 +132,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
       name: 'Menu',
       path: '/menu',
       icon: <BookOpen className="w-6" />,
-      roles: [UserRole.MANAGER, UserRole.OWNER]
+      roles: [UserRole.WAITER, UserRole.CHEF, UserRole.MANAGER, UserRole.OWNER]
     },
     {
       name: 'Staff',
@@ -162,7 +162,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
       {/* Desktop Sidebar */}
       <div className="bg-slate-900 dark:bg-slate-950 text-white w-64 flex-shrink-0 h-full hidden md:block">
         <div className="p-4 bg-slate-950 dark:bg-black">
-          <h1 className="text-xl font-poppins font-semibold">Restaurant POS</h1>
+          <h1 className="text-xl font-poppins font-semibold">Mag7 POS</h1>
         </div>
         
         <div className="user-info p-4 border-b border-slate-700 dark:border-slate-800">
@@ -227,7 +227,7 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-4 bg-slate-950 dark:bg-black flex justify-between items-center">
-            <h1 className="text-xl font-poppins font-semibold">Restaurant POS</h1>
+            <h1 className="text-xl font-poppins font-semibold">Mag7 POS</h1>
             <button 
               className="text-slate-400 dark:text-slate-500 hover:text-white"
               onClick={() => setIsMobileSidebarOpen(false)}
