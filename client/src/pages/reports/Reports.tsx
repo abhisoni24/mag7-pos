@@ -150,6 +150,30 @@ const Reports = () => {
           count: item.count
         }))
     : [];
+    
+  // Group items by category (inferring category from item name for demo)
+  const getCategory = (itemName: string): string => {
+    const name = itemName.toLowerCase();
+    if (name.includes('nachos') || name.includes('appetizer')) return 'Appetizers';
+    if (name.includes('cake') || name.includes('pie') || name.includes('sundae')) return 'Desserts';
+    if (name.includes('soup') || name.includes('potion')) return 'Soups';
+    if (name.includes('coffee') || name.includes('tea') || name.includes('soda')) return 'Drinks';
+    return 'Main Course';
+  };
+  
+  const itemsByCategory = itemFrequency.reduce((acc, item) => {
+    const category = getCategory(item.name);
+    if (!acc[category]) {
+      acc[category] = 0;
+    }
+    acc[category] += item.count;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const itemsByCategoryChartData = Object.entries(itemsByCategory).map(([category, count]) => ({
+    name: category,
+    count
+  }));
   
   // Prepare data for orders by day of week chart
   const ordersByDayChartData = orderStatistics?.ordersByDayOfWeek
@@ -363,17 +387,115 @@ const Reports = () => {
                             <tr>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Count</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {itemFrequency.sort((a, b) => b.count - a.count).map((item, index) => (
-                              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.count}</td>
-                              </tr>
-                            ))}
+                            {itemFrequency.sort((a, b) => b.count - a.count).map((item, index) => {
+                              // Calculate percentage of total orders
+                              const totalCount = itemFrequency.reduce((sum, item) => sum + item.count, 0);
+                              const percentage = totalCount > 0 ? (item.count / totalCount * 100).toFixed(1) : '0';
+                              
+                              return (
+                                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.count}</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div className="flex items-center">
+                                      <span className="mr-2">{percentage}%</span>
+                                      <div className="w-24 bg-gray-200 rounded-full h-2.5">
+                                        <div 
+                                          className="bg-green-600 h-2.5 rounded-full" 
+                                          style={{ width: `${percentage}%` }}
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Menu Item Popularity Chart */}
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle>Menu Item Popularity Chart</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-96">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={itemFrequencyChartData}
+                              dataKey="count"
+                              nameKey="name"
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={120}
+                              innerRadius={60}
+                              paddingAngle={2}
+                              fill="#8884d8"
+                              label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                            >
+                              {itemFrequencyChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip formatter={(value, name, props) => [`${value} orders`, props.payload.name]} />
+                            <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Item Orders by Category */}
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle>Orders by Food Category</CardTitle>
+                      <CardDescription>Analysis of order distribution across menu categories</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="h-80">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={itemsByCategoryChartData}
+                                dataKey="count"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={100}
+                                fill="#8884d8"
+                                label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                              >
+                                {itemsByCategoryChartData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={CHART_COLORS[(index + 3) % CHART_COLORS.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip formatter={(value, name, props) => [`${value} orders`, props.payload.name]} />
+                              <Legend layout="vertical" verticalAlign="middle" align="right" />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        
+                        <div className="h-80">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={itemsByCategoryChartData} layout="vertical">
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis type="number" />
+                              <YAxis dataKey="name" type="category" width={100} />
+                              <Tooltip formatter={(value) => [`${value}`, 'Orders']} />
+                              <Legend />
+                              <Bar dataKey="count" name="Order Count" fill="#4CAF50" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
