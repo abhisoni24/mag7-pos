@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { authenticate } from "./middleware/auth";
-import { checkRole, isManager, isOwner, isAdmin } from "./middleware/roleCheck";
+import { checkRole, checkPermission, isHost, isWaiter, isChef, isManager, isOwner, isAdmin } from "./middleware/roleCheck";
 import { initializeDatabase } from "./utils/db";
 import { UserRole } from "@shared/schema";
 
@@ -27,10 +27,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/auth/profile", authenticate, authController.getProfile);
   
   // Table routes
-  apiRouter.get("/tables", authenticate, tableController.getTables); // All staff can view tables
-  apiRouter.get("/tables/:id", authenticate, tableController.getTable); // All staff can view table details
+  apiRouter.get("/tables", authenticate, checkPermission('tables'), tableController.getTables); // All staff can view tables
+  apiRouter.get("/tables/:id", authenticate, checkPermission('tables'), tableController.getTable); // All staff can view table details
   apiRouter.post("/tables", authenticate, isManager, tableController.createTable); // Only managers can create tables
-  apiRouter.put("/tables/:id", authenticate, tableController.updateTable); // All staff can update table status (Host marks as occupied/available)
+  apiRouter.put("/tables/:id", authenticate, checkPermission('tables'), tableController.updateTable); // All staff can update table status (Host marks as occupied/available)
   
   // Separate route for assigning waiters to tables (Manager function)
   apiRouter.put("/tables/:id/assign", authenticate, isManager, async (req, res) => {
@@ -56,8 +56,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Menu routes
-  apiRouter.get("/menu", authenticate, menuController.getMenuItems); // All staff can view menu
-  apiRouter.get("/menu/:id", authenticate, menuController.getMenuItem); // All staff can view menu item details
+  apiRouter.get("/menu", authenticate, checkPermission('menu'), menuController.getMenuItems); // All staff can view menu
+  apiRouter.get("/menu/:id", authenticate, checkPermission('menu'), menuController.getMenuItem); // All staff can view menu item details
   apiRouter.post("/menu", authenticate, isManager, menuController.createMenuItem); // Only managers can add menu items
   apiRouter.put("/menu/:id", authenticate, isManager, menuController.updateMenuItem); // Only managers can update menu items
   apiRouter.delete("/menu/:id", authenticate, isManager, menuController.deleteMenuItem); // Only managers can delete menu items
@@ -86,9 +86,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Order routes
-  apiRouter.get("/orders", authenticate, orderController.getOrders); // All staff can view orders
-  apiRouter.get("/orders/:id", authenticate, orderController.getOrder); // All staff can view order details
-  apiRouter.post("/orders", authenticate, orderController.createOrder); // Waiters can create orders
+  apiRouter.get("/orders", authenticate, checkPermission('orders'), orderController.getOrders); // All staff with orders permission can view orders
+  apiRouter.get("/orders/:id", authenticate, checkPermission('orders'), orderController.getOrder); // All staff with orders permission can view order details
+  apiRouter.post("/orders", authenticate, checkPermission('orders'), orderController.createOrder); // Waiters and above can create orders
   
   // Restricted route for updating order status (Only Chef can mark as in-progress/done)
   apiRouter.put("/orders/:id/status", authenticate, async (req, res) => {
@@ -116,8 +116,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  apiRouter.post("/orders/:id/items", authenticate, orderController.addItemToOrder); // Waiters can add items to orders
-  apiRouter.put("/orders/:orderId/items/:itemId", authenticate, orderController.updateOrderItem); // Waiters can update order items
+  apiRouter.post("/orders/:id/items", authenticate, checkPermission('orders'), orderController.addItemToOrder); // Waiters can add items to orders
+  apiRouter.put("/orders/:orderId/items/:itemId", authenticate, checkPermission('orders'), orderController.updateOrderItem); // Waiters can update order items
   
   // Staff routes
   // Allow hosts to view waiters for table assignment
@@ -126,6 +126,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If role is host and they're requesting only waiters, allow it
       const { role } = req.query;
       if (req.user && req.user.role === UserRole.HOST && role === 'waiter') {
+        return staffController.getStaff(req, res);
+      }
+      
+      // If user has 'view_staff' permission (host) and requesting waiters, allow it
+      if (hasPermission(req.user?.role || '', 'view_staff') && role === 'waiter') {
         return staffController.getStaff(req, res);
       }
       

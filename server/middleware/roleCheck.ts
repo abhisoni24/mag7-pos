@@ -11,6 +11,16 @@ const roleHierarchy: Record<string, number> = {
   [UserRole.ADMIN]: 5
 };
 
+// Role-specific permissions matrix
+const rolePermissions: Record<string, string[]> = {
+  [UserRole.HOST]: ['tables', 'menu', 'view_staff'],
+  [UserRole.WAITER]: ['tables', 'menu', 'orders', 'payments'],
+  [UserRole.CHEF]: ['orders', 'menu'],
+  [UserRole.MANAGER]: ['tables', 'menu', 'orders', 'payments', 'staff', 'assign_tables'],
+  [UserRole.OWNER]: ['tables', 'menu', 'orders', 'payments', 'staff', 'reports', 'assign_tables'],
+  [UserRole.ADMIN]: ['all']
+};
+
 export const checkRole = (requiredRole: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -20,13 +30,24 @@ export const checkRole = (requiredRole: string) => {
     const userRoleLevel = roleHierarchy[req.user.role] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
     
-    // Special handling for chef role which is not in the hierarchy
-    if (requiredRole === UserRole.CHEF && req.user.role === UserRole.CHEF) {
+    // Admin can access everything
+    if (req.user.role === UserRole.ADMIN) {
       return next();
     }
     
-    // Admin can access everything
-    if (req.user.role === UserRole.ADMIN) {
+    // Owner can do everything a manager can do
+    if (req.user.role === UserRole.OWNER && requiredRole === UserRole.MANAGER) {
+      return next();
+    }
+    
+    // Manager/Owner can do what waiters can do
+    if ((req.user.role === UserRole.MANAGER || req.user.role === UserRole.OWNER) && 
+        requiredRole === UserRole.WAITER) {
+      return next();
+    }
+    
+    // Special handling for chef role
+    if (requiredRole === UserRole.CHEF && req.user.role === UserRole.CHEF) {
       return next();
     }
     
@@ -39,6 +60,47 @@ export const checkRole = (requiredRole: string) => {
       message: 'Access denied. You do not have the required permission.' 
     });
   };
+};
+
+// Helper function to check if a user has a specific permission
+export const hasPermission = (userRole: string, permission: string): boolean => {
+  if (userRole === UserRole.ADMIN || rolePermissions[userRole]?.includes('all')) {
+    return true;
+  }
+  
+  return rolePermissions[userRole]?.includes(permission) || false;
+};
+
+// Middleware to check for a specific permission
+export const checkPermission = (permission: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    if (hasPermission(req.user.role, permission)) {
+      return next();
+    }
+    
+    return res.status(403).json({ 
+      message: 'Access denied. You do not have the required permission.' 
+    });
+  };
+};
+
+// Check if user is waiter or higher
+export const isWaiter = (req: Request, res: Response, next: NextFunction) => {
+  return checkRole(UserRole.WAITER)(req, res, next);
+};
+
+// Check if user is chef
+export const isChef = (req: Request, res: Response, next: NextFunction) => {
+  return checkRole(UserRole.CHEF)(req, res, next);
+};
+
+// Check if user is host
+export const isHost = (req: Request, res: Response, next: NextFunction) => {
+  return checkRole(UserRole.HOST)(req, res, next);
 };
 
 // Check if user is manager or higher
