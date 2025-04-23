@@ -37,6 +37,7 @@ const TableDetailsModal = ({
 }: TableDetailsModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
+  const { user } = useSelector((state: RootState) => state.auth);
   
   // Form state
   const [status, setStatus] = useState<string>(table.status);
@@ -255,6 +256,8 @@ const TableDetailsModal = ({
               <Button 
                 className="flex-1 bg-primary text-white hover:bg-primary-dark"
                 onClick={onCreateOrder}
+                // Allow waiter to create orders even if they can't change table status
+                disabled={!canChangeStatus && user?.role !== UserRole.WAITER}
               >
                 Create Order
               </Button>
@@ -266,7 +269,11 @@ const TableDetailsModal = ({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>
+          <Button 
+            onClick={handleSave}
+            // Waiters can't save changes to table status
+            disabled={user?.role === UserRole.WAITER}
+          >
             Save Changes
           </Button>
         </DialogFooter>

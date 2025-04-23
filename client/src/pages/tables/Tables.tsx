@@ -35,7 +35,7 @@ const Tables = () => {
   
   // Fetch tables and staff on component mount
   useEffect(() => {
-    dispatch(fetchTables());
+    dispatch(fetchTables({}));
     dispatch(fetchStaff('waiter'));
   }, [dispatch]);
   
@@ -74,7 +74,13 @@ const Tables = () => {
   
   // Check if user is allowed to change table status
   const canChangeTableStatus = () => {
-    return user && [UserRole.HOST, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN].includes(user.role as UserRole);
+    // Let host and managers and above change table status completely
+    if (user && [UserRole.HOST, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN].includes(user.role)) {
+      return true;
+    }
+    
+    // Waiters can access tables but not change status (they can create orders)
+    return false;
   };
 
   return (
