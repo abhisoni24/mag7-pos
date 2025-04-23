@@ -20,7 +20,7 @@ const Kitchen = () => {
   useEffect(() => {
     dispatch(fetchOrders({ status: OrderStatus.NEW }));
     dispatch(fetchOrders({ status: OrderStatus.IN_PROGRESS }));
-    dispatch(fetchTables());
+    dispatch(fetchTables({}));
     
     // Set up polling for new orders
     const interval = setInterval(() => {
@@ -149,7 +149,9 @@ const Kitchen = () => {
               Details
             </Button>
             <Button 
-              className={`flex-1 ${actionBtnColor}`}
+              className={`flex-1 font-semibold text-white ${
+                status === 'new' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
+              }`}
               onClick={actionHandler}
             >
               {actionBtnText}
@@ -307,7 +309,7 @@ const Kitchen = () => {
                   {selectedOrder.status === OrderStatus.NEW && (
                     <Button 
                       variant="default"
-                      className="bg-warning text-white"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                       onClick={() => {
                         handleStartOrder(selectedOrder);
                         setSelectedOrder(null);
@@ -319,7 +321,7 @@ const Kitchen = () => {
                   {selectedOrder.status === OrderStatus.IN_PROGRESS && (
                     <Button 
                       variant="default"
-                      className="bg-success text-white"
+                      className="bg-green-600 hover:bg-green-700 text-white font-semibold"
                       onClick={() => {
                         handleCompleteOrder(selectedOrder);
                         setSelectedOrder(null);
