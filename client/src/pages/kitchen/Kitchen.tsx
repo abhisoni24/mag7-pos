@@ -33,7 +33,8 @@ const Kitchen = () => {
   // Fetch orders by status
   const fetchOrdersByStatus = async (status: string) => {
     try {
-      await dispatch(fetchOrders({ status })).unwrap();
+      const results = await dispatch(fetchOrders({ status })).unwrap();
+      console.log(`Orders with status ${status}:`, results);
       
       // Update which order types have loaded
       setOrderTypesLoaded(prev => ({
