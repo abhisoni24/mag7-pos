@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { authenticate } from "./middleware/auth";
-import { checkRole, checkPermission, isHost, isWaiter, isChef, isManager, isOwner, isAdmin } from "./middleware/roleCheck";
+import { checkRole, checkPermission, hasPermission, isHost, isWaiter, isChef, isManager, isOwner, isAdmin } from "./middleware/roleCheck";
 import { initializeDatabase } from "./utils/db";
 import { UserRole } from "@shared/schema";
 
@@ -95,6 +95,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { status } = req.body;
+      
+      // First check if the user has basic orders permission
+      if (!hasPermission(req.user?.role || '', 'orders')) {
+        return res.status(403).json({ 
+          message: 'Access denied. You do not have permission to manage orders.' 
+        });
+      }
       
       // If updating to in-progress or done, only chef or higher can do it
       if ((status === 'in-progress' || status === 'done') && 
@@ -247,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Payment routes
   const paymentsRouter = express.Router();
-  apiRouter.use("/payments", authenticate, paymentsRouter);
+  apiRouter.use("/payments", authenticate, checkPermission('payments'), paymentsRouter);
   
   paymentsRouter.post("/", async (req, res) => {
     try {
