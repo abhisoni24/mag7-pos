@@ -2,7 +2,7 @@
  * JWT Authentication Utilities
  * 
  * This module provides utilities for generating and verifying JSON Web Tokens (JWT)
- * for user authentication in the Restaurant POS system.
+ * for user authentication in the Mag7 POS system.
  * 
  * @module utils/jwt
  */
@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 import { MongoUser } from '@shared/schema';
 
 // In a production app, this should be stored in environment variables
-const JWT_SECRET = process.env.JWT_SECRET || 'restaurant-pos-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'mag7-pos-secret-key';
 const JWT_EXPIRES_IN = '24h';
 
 /**

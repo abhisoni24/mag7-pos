@@ -363,7 +363,7 @@ const SystemAdmin = () => {
                   <div>
                     <Label className="text-sm text-gray-500">Database Name</Label>
                     <div className="font-mono text-sm bg-gray-100 p-2 rounded mt-1">
-                      restaurant_pos
+                      mag7_pos
                     </div>
                   </div>
                 </div>

@@ -69,7 +69,7 @@ export class MongoDBStorage implements IStorage {
   async initialize(): Promise<void> {
     if (!this.initialized) {
       await this.client.connect();
-      this.db = this.client.db("restaurant_pos");
+      this.db = this.client.db("mag7_pos");
       this.initialized = true;
       console.log("MongoDB connected");
       

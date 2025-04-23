@@ -83,7 +83,7 @@ const AdminLogin = () => {
       <Card className="w-full max-w-md mx-4">
         <CardContent className="pt-6">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800 font-poppins">Restaurant POS</h1>
+            <h1 className="text-2xl font-semibold text-gray-800 font-poppins">Mag7 POS</h1>
             <p className="text-gray-600 mt-2">Admin Sign In</p>
           </div>
           

@@ -100,7 +100,7 @@ const Login = () => {
       <Card className="w-full max-w-md mx-4">
         <CardContent className="pt-6">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-semibold text-foreground font-poppins">Restaurant POS</h1>
+            <h1 className="text-2xl font-semibold text-foreground font-poppins">Mag7 POS</h1>
             <p className="text-muted-foreground mt-2">Sign in to continue</p>
           </div>
           
