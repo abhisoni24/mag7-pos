@@ -74,7 +74,7 @@ const Tables = () => {
   
   // Check if user is allowed to change table status
   const canChangeTableStatus = () => {
-    return user && [UserRole.HOST, UserRole.MANAGER, UserRole.OWNER].includes(user.role as UserRole);
+    return user && [UserRole.HOST, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN].includes(user.role as UserRole);
   };
 
   return (

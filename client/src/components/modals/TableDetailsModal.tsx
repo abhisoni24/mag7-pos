@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateTable } from '../../redux/tableSlice';
-import { AppDispatch } from '../../redux/store';
+import { AppDispatch, RootState } from '../../redux/store';
 import { Table as TableType } from '../../redux/tableSlice';
 import { StaffMember } from '../../redux/staffSlice';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TableStatus } from '@shared/schema';
+import { TableStatus, UserRole } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import {
   Select,
