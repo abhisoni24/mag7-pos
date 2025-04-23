@@ -32,19 +32,36 @@ export const getRevenue = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
     
+    console.log("Revenue report for:", { startDate, endDate });
+    
     if (!startDate || !endDate) {
       return res.status(400).json({ message: 'Start date and end date are required' });
     }
     
+    // Set time to beginning and end of day
     const start = new Date(startDate as string);
+    start.setHours(0, 0, 0, 0);
+    
     const end = new Date(endDate as string);
+    end.setHours(23, 59, 59, 999);
+    
+    console.log("Date range:", { 
+      start: start.toISOString(), 
+      end: end.toISOString() 
+    });
     
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({ message: 'Invalid date format. Use YYYY-MM-DD format.' });
     }
     
+    // Check for payments - specifically get all payments regardless of date
+    const allPayments = await storage.getAllPayments();
+    console.log("All payments in DB:", allPayments);
+    
     const totalRevenue = await storage.getRevenueByDateRange(start, end);
     const payments = await storage.getPaymentsByDateRange(start, end);
+    
+    console.log("Filtered payments:", payments);
     
     // Calculate revenue by payment method
     const revenueByMethod: Record<string, number> = {};

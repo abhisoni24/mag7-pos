@@ -270,8 +270,7 @@ const TableDetailsModal = ({
           </Button>
           <Button 
             onClick={handleSave}
-            // Waiters can't save changes to table status
-            disabled={user?.role === 'waiter'}
+            // All roles including waiters can save changes to table status
           >
             Save Changes
           </Button>

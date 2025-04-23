@@ -49,6 +49,7 @@ export interface IStorage {
   getPayment(id: string): Promise<MongoPayment | null>;
   getPaymentByOrder(orderId: string): Promise<MongoPayment | null>;
   createPayment(payment: InsertPayment): Promise<MongoPayment>;
+  getAllPayments(): Promise<MongoPayment[]>;
   
   // Reporting operations
   getOrdersByDateRange(startDate: Date, endDate: Date): Promise<MongoOrder[]>;
@@ -379,6 +380,14 @@ export class MongoDBStorage implements IStorage {
     if (!this.db) throw new Error("Database not initialized");
     
     return this.db.collection("payments").findOne<MongoPayment>({ orderId }) as Promise<MongoPayment | null>;
+  }
+  
+  // Helper method to get all payments for debugging
+  async getAllPayments(): Promise<MongoPayment[]> {
+    await this.initialize();
+    if (!this.db) throw new Error("Database not initialized");
+    
+    return this.db.collection("payments").find<MongoPayment>({}).toArray();
   }
 
   async createPayment(payment: InsertPayment): Promise<MongoPayment> {
