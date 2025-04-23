@@ -171,6 +171,7 @@ export interface MongoOrder {
   createdAt: Date;
   updatedAt: Date;
   items: MongoOrderItem[];
+  timestamp?: number; // Added for unique order identification
 }
 
 export interface MongoOrderItem {
@@ -189,6 +190,7 @@ export interface MongoPayment {
   tip: number;
   paymentMethod: string;
   paymentDate: Date;
+  timestamp?: number; // Added for better filtering in report queries
 }
 
 // Login schema for validation

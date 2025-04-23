@@ -287,12 +287,21 @@ export class MongoDBStorage implements IStorage {
     if (!this.db) throw new Error("Database not initialized");
     
     const now = new Date();
+    // Create a timestamp-based order ID prefix to make it unique
+    const timestamp = now.getTime();
+    const timestampPrefix = timestamp.toString();
+    
     const mongoOrder: MongoOrder = {
       ...order as unknown as MongoOrder,
       createdAt: now,
       updatedAt: now,
-      items: []
+      items: [],
+      // Add a timestamp field for easier identification
+      timestamp: timestamp
     };
+    
+    // Log the unique order being created
+    console.log(`Creating order with timestamp: ${timestamp} for table: ${order.tableId}`);
     
     const result = await this.db.collection("orders").insertOne(mongoOrder);
     return { ...mongoOrder, _id: result.insertedId.toString() };
@@ -394,10 +403,23 @@ export class MongoDBStorage implements IStorage {
     await this.initialize();
     if (!this.db) throw new Error("Database not initialized");
     
+    // Create a timestamp-based payment with current date/time
+    const now = new Date();
+    
     const mongoPayment: MongoPayment = {
       ...payment as unknown as MongoPayment,
-      paymentDate: new Date()
+      paymentDate: now,
+      timestamp: now.getTime() // Add a timestamp for easier filtering and debugging
     };
+    
+    // Log detailed payment info for debugging
+    console.log("Creating payment:", { 
+      orderId: payment.orderId, 
+      amount: payment.amount, 
+      paymentMethod: payment.paymentMethod,
+      paymentDate: now.toISOString(),
+      timestamp: now.getTime()
+    });
     
     const result = await this.db.collection("payments").insertOne(mongoPayment);
     
@@ -421,19 +443,46 @@ export class MongoDBStorage implements IStorage {
     await this.initialize();
     if (!this.db) throw new Error("Database not initialized");
     
+    // Get start and end timestamps for more precise filtering
+    const startTimestamp = startDate.getTime();
+    const endTimestamp = endDate.getTime();
+    
     // Log the query criteria
     console.log("Payments query:", { 
       startDate: startDate.toISOString(), 
-      endDate: endDate.toISOString()
+      endDate: endDate.toISOString(),
+      startTimestamp,
+      endTimestamp
     });
     
     // Get all payments from the database to debug
     const allPayments = await this.db.collection("payments").find().toArray();
     console.log("All payments in DB:", allPayments);
     
-    return this.db.collection("payments").find<MongoPayment>({
+    // Try querying by timestamp first if we have payments with that field
+    const hasTimestampPayments = allPayments.some(p => p.timestamp);
+    
+    let payments: MongoPayment[] = [];
+    
+    if (hasTimestampPayments) {
+      // Query by timestamp if available
+      console.log("Querying payments by timestamp field");
+      payments = await this.db.collection("payments").find<MongoPayment>({
+        timestamp: { $gte: startTimestamp, $lte: endTimestamp }
+      }).toArray();
+      
+      if (payments.length > 0) {
+        return payments;
+      }
+    }
+    
+    // Fallback to date object query
+    console.log("Querying payments by paymentDate field");
+    payments = await this.db.collection("payments").find<MongoPayment>({
       paymentDate: { $gte: startDate, $lte: endDate }
     }).toArray();
+    
+    return payments;
   }
 
   async getItemOrderFrequency(startDate: Date, endDate: Date): Promise<{ menuItemId: string, name: string, count: number }[]> {
