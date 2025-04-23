@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Order, OrderItem as OrderItemType } from '../../redux/orderSlice';
 import { Table } from '../../redux/tableSlice';
 import { OrderStatus } from '@shared/schema';
+import * as api from '../../lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -270,9 +271,27 @@ const OrderItem = ({ order, table, onViewDetails, onUpdateStatus }: OrderItemPro
             <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>Cancel</Button>
             <Button 
               className="bg-green-600 hover:bg-green-700"
-              onClick={() => {
-                onUpdateStatus(OrderStatus.PAID);
-                setShowPaymentDialog(false);
+              onClick={async () => {
+                try {
+                  // First create the payment record
+                  await api.createPayment({
+                    orderId: order._id,
+                    amount: total, 
+                    tip: tipAmount,
+                    paymentMethod: 'cash'
+                  });
+                  
+                  // The payment API will automatically update the order status to paid
+                  // So we don't need to call onUpdateStatus(OrderStatus.PAID)
+                  
+                  // Refresh the orders
+                  window.location.reload();
+                  
+                  setShowPaymentDialog(false);
+                } catch (error) {
+                  console.error('Error processing payment:', error);
+                  alert('Failed to process payment. Please try again.');
+                }
               }}
             >
               Confirm Payment
