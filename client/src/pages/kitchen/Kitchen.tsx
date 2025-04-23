@@ -120,7 +120,9 @@ const Kitchen = () => {
   }, [orders]);
   
   // Determine if we're still in the loading state
-  const isLoading = loading || tablesLoading || isRefreshing || !initialLoadComplete;
+  // Only show loading if we're actually loading or refreshing and don't have orders yet
+  const isLoading = (loading || tablesLoading || isRefreshing) && 
+    (incomingOrders.length === 0 && inProgressOrders.length === 0);
   
   // Get table number from table ID
   const getTableNumber = (tableId: string) => {

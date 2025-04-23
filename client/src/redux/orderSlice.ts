@@ -137,7 +137,17 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrders.fulfilled, (state, action: PayloadAction<Order[]>) => {
         state.loading = false;
-        state.orders = action.payload;
+        
+        // Add new orders while ensuring no duplicates
+        const newOrders = action.payload;
+        const existingOrderIds = new Set(state.orders.map(order => order._id));
+        
+        // First remove any updated orders from state that exist in the new batch
+        state.orders = state.orders.filter(order => 
+          !newOrders.some(newOrder => newOrder._id === order._id));
+        
+        // Then add all the new orders
+        state.orders = [...state.orders, ...newOrders];
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
