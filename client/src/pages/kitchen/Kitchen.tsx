@@ -13,18 +13,64 @@ import { Clock, Utensils } from 'lucide-react';
 const Kitchen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { orders, loading } = useSelector((state: RootState) => state.orders);
-  const { tables } = useSelector((state: RootState) => state.tables);
+  const { tables, loading: tablesLoading } = useSelector((state: RootState) => state.tables);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(true);
   const { toast } = useToast();
   
+  // Track if initial loading is complete
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Track which order types have loaded
+  const [orderTypesLoaded, setOrderTypesLoaded] = useState({
+    new: false,
+    inProgress: false,
+    done: false
+  });
+  
+  // Fetch orders by status
+  const fetchOrdersByStatus = async (status: string) => {
+    try {
+      await dispatch(fetchOrders({ status })).unwrap();
+      
+      // Update which order types have loaded
+      setOrderTypesLoaded(prev => ({
+        ...prev,
+        [status === OrderStatus.NEW ? 'new' : 
+         status === OrderStatus.IN_PROGRESS ? 'inProgress' : 'done']: true
+      }));
+    } catch (error) {
+      console.error(`Error fetching ${status} orders:`, error);
+    }
+  };
+  
   // Fetch all orders with different statuses
-  const fetchAllKitchenOrders = () => {
+  const fetchAllKitchenOrders = async () => {
     console.log('Fetching kitchen orders...');
-    // Fetch all order statuses that chef needs to see
-    dispatch(fetchOrders({ status: OrderStatus.NEW }));
-    dispatch(fetchOrders({ status: OrderStatus.IN_PROGRESS }));
-    dispatch(fetchOrders({ status: OrderStatus.DONE }));
-    dispatch(fetchTables({}));
+    setIsRefreshing(true);
+    
+    try {
+      // Reset loaded states
+      setOrderTypesLoaded({
+        new: false,
+        inProgress: false,
+        done: false
+      });
+      
+      // Fetch tables first
+      await dispatch(fetchTables({})).unwrap();
+      
+      // Fetch orders in sequence to avoid race conditions
+      await fetchOrdersByStatus(OrderStatus.NEW);
+      await fetchOrdersByStatus(OrderStatus.IN_PROGRESS);
+      await fetchOrdersByStatus(OrderStatus.DONE);
+      
+      setInitialLoadComplete(true);
+    } catch (error) {
+      console.error("Error in fetchAllKitchenOrders:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
   
   useEffect(() => {
@@ -43,14 +89,18 @@ const Kitchen = () => {
   const handleRefresh = () => {
     fetchAllKitchenOrders();
     toast({
-      title: "Refreshed",
-      description: "Kitchen display updated with latest orders",
+      title: "Refreshing...",
+      description: "Kitchen display updating with latest orders",
     });
   };
   
+  // Derived state
   const incomingOrders = orders.filter(order => order.status === OrderStatus.NEW);
   const inProgressOrders = orders.filter(order => order.status === OrderStatus.IN_PROGRESS);
   const completedOrders = orders.filter(order => order.status === OrderStatus.DONE);
+  
+  // Determine if we're still in the loading state
+  const isLoading = loading || tablesLoading || isRefreshing || !initialLoadComplete;
   
   // Get table number from table ID
   const getTableNumber = (tableId: string) => {
@@ -199,7 +249,7 @@ const Kitchen = () => {
           </Button>
         </div>
         
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>

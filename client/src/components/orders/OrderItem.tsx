@@ -124,13 +124,14 @@ const OrderItem = ({ order, table, onViewDetails, onUpdateStatus }: OrderItemPro
   const tableNumber = table ? table.number : 'Unknown';
   const timeAgo = getTimeDistance(order.createdAt);
   const nextStatuses = getNextStatuses(order.status);
+  const orderId = order._id ? order._id.substring(order._id.length - 4) : 'N/A';
 
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-3">
           <div>
-            <span className="font-medium text-lg">Order #{order._id?.substring(0, 4)}</span>
+            <span className="font-medium text-lg">Order #{orderId}</span>
             <Badge className={color + " ml-2"}>
               {text}
             </Badge>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrders, Order, updateOrderStatus } from '../../redux/orderSlice';
 import { fetchTables } from '../../redux/tableSlice';
+import { fetchStaff, StaffMember } from '../../redux/staffSlice';
 import { AppDispatch, RootState } from '../../redux/store';
 import OrderItem from '../../components/orders/OrderItem';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -15,6 +16,7 @@ const Orders = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { orders, loading } = useSelector((state: RootState) => state.orders);
   const { tables } = useSelector((state: RootState) => state.tables);
+  const { staff } = useSelector((state: RootState) => state.staff);
   const { user } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -25,6 +27,8 @@ const Orders = () => {
     // Fetch all orders regardless of role
     dispatch(fetchOrders({}));
     dispatch(fetchTables({}));
+    // Fetch waiters for order assignment info
+    dispatch(fetchStaff('waiter'));
   }, [dispatch]);
   
   const filteredOrders = orders.filter(order => {
