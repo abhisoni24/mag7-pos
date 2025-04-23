@@ -160,13 +160,14 @@ export const addItemToOrder = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Cannot add items to a paid order' });
     }
     
-    // Add item to order
-    const orderItem: InsertOrderItem = {
-      menuItemId,
+    // For MongoDB we just need these fields, not the full Drizzle InsertOrderItem
+    const orderItem = {
+      menuItemId: menuItem._id,
       quantity: quantity || 1,
       price: price || menuItem.price,
       notes,
-      status: OrderStatus.NEW
+      status: OrderStatus.NEW,
+      name: menuItem.name
     };
     
     const updatedOrder = await storage.addItemToOrder(orderId, orderItem);

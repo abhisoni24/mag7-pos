@@ -42,8 +42,8 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<MongoOrder>;
   updateOrder(id: string, order: Partial<MongoOrder>): Promise<MongoOrder | null>;
   updateOrderStatus(id: string, status: string): Promise<MongoOrder | null>;
-  addItemToOrder(orderId: string, item: InsertOrderItem): Promise<MongoOrder | null>;
-  updateOrderItem(orderId: string, itemId: string, item: Partial<InsertOrderItem>): Promise<MongoOrder | null>;
+  addItemToOrder(orderId: string, item: any): Promise<MongoOrder | null>;
+  updateOrderItem(orderId: string, itemId: string, item: any): Promise<MongoOrder | null>;
 
   // Payment operations
   getPayment(id: string): Promise<MongoPayment | null>;
@@ -316,7 +316,7 @@ export class MongoDBStorage implements IStorage {
     return this.updateOrder(id, { status } as Partial<MongoOrder>);
   }
 
-  async addItemToOrder(orderId: string, item: InsertOrderItem): Promise<MongoOrder | null> {
+  async addItemToOrder(orderId: string, item: any): Promise<MongoOrder | null> {
     await this.initialize();
     if (!this.db) throw new Error("Database not initialized");
     
@@ -327,10 +327,10 @@ export class MongoDBStorage implements IStorage {
     const orderItem = {
       menuItemId: item.menuItemId.toString(),
       name: menuItem.name,
-      quantity: item.quantity,
-      price: parseFloat(item.price.toString()),
-      notes: item.notes,
-      status: item.status
+      quantity: item.quantity || 1,
+      price: typeof item.price === 'number' ? item.price : menuItem.price,
+      notes: item.notes || null,
+      status: item.status || OrderStatus.NEW
     };
     
     const result = await this.db.collection("orders").findOneAndUpdate(
@@ -345,7 +345,7 @@ export class MongoDBStorage implements IStorage {
     return result as unknown as MongoOrder | null;
   }
 
-  async updateOrderItem(orderId: string, itemId: string, updates: Partial<InsertOrderItem>): Promise<MongoOrder | null> {
+  async updateOrderItem(orderId: string, itemId: string, updates: any): Promise<MongoOrder | null> {
     await this.initialize();
     if (!this.db) throw new Error("Database not initialized");
     
