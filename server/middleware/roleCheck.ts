@@ -15,7 +15,7 @@ const roleHierarchy: Record<string, number> = {
 export const rolePermissions: Record<string, string[]> = {
   [UserRole.HOST]: ['tables', 'menu', 'view_staff'],
   [UserRole.WAITER]: ['tables', 'menu', 'orders', 'payments', 'assign_tables', 'update_tables'],
-  [UserRole.CHEF]: ['orders', 'menu'],
+  [UserRole.CHEF]: ['tables', 'orders', 'menu', 'view_staff'],
   [UserRole.MANAGER]: ['tables', 'menu', 'orders', 'payments', 'staff', 'assign_tables'],
   [UserRole.OWNER]: ['tables', 'menu', 'orders', 'payments', 'staff', 'reports', 'assign_tables'],
   [UserRole.ADMIN]: ['all']
