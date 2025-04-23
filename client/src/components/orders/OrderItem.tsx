@@ -274,6 +274,10 @@ const OrderItem = ({ order, table, onViewDetails, onUpdateStatus }: OrderItemPro
               onClick={async () => {
                 try {
                   // First create the payment record
+                  if (!order._id) {
+                    throw new Error('Order ID is missing');
+                  }
+                  
                   await api.createPayment({
                     orderId: order._id,
                     amount: total, 

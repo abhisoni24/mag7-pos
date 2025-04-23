@@ -22,16 +22,10 @@ const Orders = () => {
   const { toast } = useToast();
   
   useEffect(() => {
-    // If the user is a waiter, only fetch their orders
-    if (user?.role === 'waiter') {
-      dispatch(fetchOrders({ waiterId: user.id }));
-    } else {
-      // For other roles, fetch all orders
-      dispatch(fetchOrders({}));
-    }
-    
+    // Fetch all orders regardless of role
+    dispatch(fetchOrders({}));
     dispatch(fetchTables({}));
-  }, [dispatch, user]);
+  }, [dispatch]);
   
   const filteredOrders = orders.filter(order => {
     // Filter by tab - no need to filter by waiter ID here since we already do it in API call

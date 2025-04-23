@@ -412,6 +412,16 @@ export class MongoDBStorage implements IStorage {
     await this.initialize();
     if (!this.db) throw new Error("Database not initialized");
     
+    // Log the query criteria
+    console.log("Payments query:", { 
+      startDate: startDate.toISOString(), 
+      endDate: endDate.toISOString()
+    });
+    
+    // Get all payments from the database to debug
+    const allPayments = await this.db.collection("payments").find().toArray();
+    console.log("All payments in DB:", allPayments);
+    
     return this.db.collection("payments").find<MongoPayment>({
       paymentDate: { $gte: startDate, $lte: endDate }
     }).toArray();
