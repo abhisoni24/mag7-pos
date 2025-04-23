@@ -103,6 +103,22 @@ const Kitchen = () => {
   const inProgressOrders = orders.filter(order => order.status === OrderStatus.IN_PROGRESS);
   const completedOrders = orders.filter(order => order.status === OrderStatus.DONE);
   
+  // Debug the filtered orders
+  useEffect(() => {
+    console.log("Orders in Redux state:", orders.length);
+    console.log("OrderStatus.NEW =", OrderStatus.NEW);
+    console.log("OrderStatus.IN_PROGRESS =", OrderStatus.IN_PROGRESS);
+    
+    // Log each order status to debug
+    orders.forEach(order => {
+      console.log(`Order ID ${order._id?.substring(order._id.length - 4)}, status: "${order.status}"`);
+    });
+    
+    console.log("Incoming orders:", incomingOrders.length);
+    console.log("In-progress orders:", inProgressOrders.length);
+    console.log("Completed orders:", completedOrders.length);
+  }, [orders]);
+  
   // Determine if we're still in the loading state
   const isLoading = loading || tablesLoading || isRefreshing || !initialLoadComplete;
   
