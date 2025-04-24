@@ -43,8 +43,18 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
-    // Note: We no longer validate role - users will be directed to their actual role's dashboard
-    // This allows users to have just one set of credentials instead of role-specific logins
+    // Check if there's a role restriction (for admin-only login or staff-only login)
+    if (validatedData.role) {
+      // If admin role is requested, only allow actual admins to log in
+      if (validatedData.role === 'admin' && user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied. Admin login required.' });
+      }
+      
+      // If non-admin role is requested, don't allow admins to log in through staff portal
+      if (validatedData.role === 'staff' && user.role === 'admin') {
+        return res.status(403).json({ message: 'Admins must use the admin login page.' });
+      }
+    }
     
     // Generate JWT token
     const token = generateToken(user);

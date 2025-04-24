@@ -44,8 +44,8 @@ const Login = () => {
     e.preventDefault();
     
     try {
-      // Log in without specifying role - the backend will return the user with their actual role
-      const response = await dispatch(login({ email, password })).unwrap();
+      // Log in specifically as non-admin staff user
+      const response = await dispatch(login({ email, password, role: 'staff' })).unwrap();
       
       // Redirect based on user role
       switch (response.user.role) {
