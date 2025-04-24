@@ -20,8 +20,6 @@ import SystemAdmin from "./pages/system/SystemAdmin";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
-import dotenv from "dotenv";
-dotenv.config();
 
 function App() {
   // Set up light mode by default

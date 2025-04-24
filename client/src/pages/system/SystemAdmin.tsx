@@ -53,9 +53,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import dotenv from "dotenv";
-dotenv.config();
-
 const SystemAdmin = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { staff, loading } = useSelector((state: RootState) => state.staff);
