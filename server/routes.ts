@@ -293,21 +293,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderTableId: order.tableId
       });
       
-      // Permission check: Only the assigned waiter, managers, or owners can process payments
+      // Permission check: Allow all waiters to process payments for now
       if (req.user) {
         const isHigherRole = ['manager', 'owner', 'admin'].includes(req.user.role);
-        // Fix the comparison to use string comparison for waiterId
-        const isAssignedWaiter = table && 
-                               table.waiterId && 
-                               req.user.id && 
-                               String(table.waiterId) === String(req.user.id);
+        const isWaiter = req.user.role === UserRole.WAITER;
         
-        // Also allow the waiter who created the order to process payment
-        const isOrderCreator = order.waiterId && String(order.waiterId) === String(req.user.id);
-        
-        if (!isHigherRole && !isAssignedWaiter && !isOrderCreator) {
+        // Allow all waiters to process payments
+        if (!isHigherRole && !isWaiter) {
           return res.status(403).json({ 
-            message: 'Only the assigned waiter, managers, or owners can process payments' 
+            message: 'Only waiters, managers, or owners can process payments' 
           });
         }
       }
