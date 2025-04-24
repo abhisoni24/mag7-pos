@@ -285,12 +285,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get table information to check assigned waiter
       const table = await storage.getTable(order.tableId);
       
+      console.log('Payment request:', {
+        userRole: req.user?.role,
+        userId: req.user?.id,
+        tableWaiterId: table?.waiterId,
+        orderId: orderId,
+        orderTableId: order.tableId
+      });
+      
       // Permission check: Only the assigned waiter, managers, or owners can process payments
       if (req.user) {
         const isHigherRole = ['manager', 'owner', 'admin'].includes(req.user.role);
-        const isAssignedWaiter = table && table.waiterId === req.user.id;
+        // Fix the comparison to use string comparison for waiterId
+        const isAssignedWaiter = table && 
+                               table.waiterId && 
+                               req.user.id && 
+                               String(table.waiterId) === String(req.user.id);
         
-        if (!isHigherRole && !isAssignedWaiter) {
+        // Also allow the waiter who created the order to process payment
+        const isOrderCreator = order.waiterId && String(order.waiterId) === String(req.user.id);
+        
+        if (!isHigherRole && !isAssignedWaiter && !isOrderCreator) {
           return res.status(403).json({ 
             message: 'Only the assigned waiter, managers, or owners can process payments' 
           });
