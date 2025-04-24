@@ -1,7 +1,25 @@
+/**
+ * Table Controller
+ * 
+ * This module handles table-related operations including retrieving, creating,
+ * and updating tables in the restaurant.
+ * 
+ * @module controllers/tableController
+ */
 import { Request, Response } from 'express';
 import { storage } from '../storage';
 import { InsertTable, TableStatus } from '@shared/schema';
 
+/**
+ * GET /tables
+ * Fetch tables, optionally filtered by status, floor, or assigned waiter
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Array} List of table documents
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const getTables = async (req: Request, res: Response) => {
   try {
     const { status, floor, waiterId } = req.query;
@@ -28,6 +46,17 @@ export const getTables = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * GET /tables/:id
+ * Fetch a specific table by ID
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} Table document
+ * @throws {404} If table is not found
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const getTable = async (req: Request, res: Response) => {
   try {
     const tableId = req.params.id;
@@ -47,6 +76,16 @@ export const getTable = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * POST /tables
+ * Create a new table
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} Created table document
+ * @throws {400} If table number already exists or there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const createTable = async (req: Request, res: Response) => {
   try {
     const { number, capacity, floor } = req.body;
@@ -78,6 +117,17 @@ export const createTable = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * PUT /tables/:id
+ * Update an existing table
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} Updated table document
+ * @throws {400} If changing to occupied status without waiterId or there's a validation error
+ * @throws {404} If table is not found
+ * @throws {500} If there's a server error
+ */
 export const updateTable = async (req: Request, res: Response) => {
   try {
     const tableId = req.params.id;

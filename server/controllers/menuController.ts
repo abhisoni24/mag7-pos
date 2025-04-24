@@ -42,6 +42,17 @@ export const getMenuItems = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * GET /menu/:id
+ * Fetch a specific menu item by ID
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} Menu item document
+ * @throws {404} If menu item is not found
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const getMenuItem = async (req: Request, res: Response) => {
   try {
     const itemId = req.params.id;
@@ -61,6 +72,16 @@ export const getMenuItem = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * POST /menu
+ * Create a new menu item
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} Created menu item
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const createMenuItem = async (req: Request, res: Response) => {
   try {
     const { name, description, price, category, available, isSpecial } = req.body;
@@ -86,6 +107,17 @@ export const createMenuItem = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * PUT /menu/:id
+ * Update an existing menu item
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} Updated menu item
+ * @throws {404} If menu item is not found
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const updateMenuItem = async (req: Request, res: Response) => {
   try {
     const itemId = req.params.id;
@@ -107,6 +139,17 @@ export const updateMenuItem = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * DELETE /menu/:id
+ * Delete a menu item
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
+ * @throws {404} If menu item is not found
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const deleteMenuItem = async (req: Request, res: Response) => {
   try {
     const itemId = req.params.id;
