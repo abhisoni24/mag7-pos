@@ -102,49 +102,49 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen }: SidebarProps) 
       name: 'Dashboard',
       path: '/dashboard',
       icon: <LayoutDashboard className="w-6" />,
-      roles: [UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER]
+      roles: [UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN]
     },
     {
       name: 'Tables',
       path: '/tables',
       icon: <LayoutGrid className="w-6" />,
-      roles: [UserRole.HOST, UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER]
+      roles: [UserRole.HOST, UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN]
     },
     {
       name: 'Orders',
       path: '/orders',
       icon: <Utensils className="w-6" />,
-      roles: [UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER]
+      roles: [UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN]
     },
     {
       name: 'Kitchen',
       path: '/kitchen',
       icon: <Flame className="w-6" />,
-      roles: [UserRole.CHEF]
+      roles: [UserRole.CHEF, UserRole.ADMIN]
     },
     {
       name: 'Payments',
       path: '/payments',
       icon: <CreditCard className="w-6" />,
-      roles: [UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER]
+      roles: [UserRole.WAITER, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN]
     },
     {
       name: 'Menu',
       path: '/menu',
       icon: <BookOpen className="w-6" />,
-      roles: [UserRole.WAITER, UserRole.CHEF, UserRole.MANAGER, UserRole.OWNER]
+      roles: [UserRole.WAITER, UserRole.CHEF, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN]
     },
     {
       name: 'Staff',
       path: '/staff',
       icon: <Users className="w-6" />,
-      roles: [UserRole.MANAGER, UserRole.OWNER]
+      roles: [UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN]
     },
     {
       name: 'Reports',
       path: '/reports',
       icon: <BarChart2 className="w-6" />,
-      roles: [UserRole.OWNER]
+      roles: [UserRole.OWNER, UserRole.ADMIN]
     },
     {
       name: 'System',

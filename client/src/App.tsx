@@ -39,7 +39,7 @@ function App() {
               
               {/* Protected Routes with Layout */}
               <Route path="/dashboard">
-                <ProtectedRoute roles={["waiter", "manager", "owner"]}>
+                <ProtectedRoute roles={["waiter", "manager", "owner", "admin"]}>
                   <Layout>
                     <Dashboard />
                   </Layout>
@@ -47,7 +47,7 @@ function App() {
               </Route>
               
               <Route path="/tables">
-                <ProtectedRoute roles={["host", "waiter", "manager", "owner"]}>
+                <ProtectedRoute roles={["host", "waiter", "manager", "owner", "admin"]}>
                   <Layout>
                     <Tables />
                   </Layout>
@@ -55,7 +55,7 @@ function App() {
               </Route>
               
               <Route path="/orders">
-                <ProtectedRoute roles={["waiter", "manager", "owner"]}>
+                <ProtectedRoute roles={["waiter", "manager", "owner", "admin"]}>
                   <Layout>
                     <Orders />
                   </Layout>
@@ -63,7 +63,7 @@ function App() {
               </Route>
               
               <Route path="/kitchen">
-                <ProtectedRoute roles={["chef"]}>
+                <ProtectedRoute roles={["chef", "admin"]}>
                   <Layout>
                     <Kitchen />
                   </Layout>
@@ -71,7 +71,7 @@ function App() {
               </Route>
               
               <Route path="/payments">
-                <ProtectedRoute roles={["waiter", "manager", "owner"]}>
+                <ProtectedRoute roles={["waiter", "manager", "owner", "admin"]}>
                   <Layout>
                     <Payments />
                   </Layout>
@@ -79,7 +79,7 @@ function App() {
               </Route>
               
               <Route path="/menu">
-                <ProtectedRoute roles={["manager", "owner"]}>
+                <ProtectedRoute roles={["manager", "owner", "admin"]}>
                   <Layout>
                     <MenuManagement />
                   </Layout>
@@ -87,7 +87,7 @@ function App() {
               </Route>
               
               <Route path="/staff">
-                <ProtectedRoute roles={["manager", "owner"]}>
+                <ProtectedRoute roles={["manager", "owner", "admin"]}>
                   <Layout>
                     <StaffManagement />
                   </Layout>
@@ -95,7 +95,7 @@ function App() {
               </Route>
               
               <Route path="/reports">
-                <ProtectedRoute roles={["owner"]}>
+                <ProtectedRoute roles={["owner", "admin"]}>
                   <Layout>
                     <Reports />
                   </Layout>

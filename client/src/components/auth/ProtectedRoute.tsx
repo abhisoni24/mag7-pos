@@ -61,6 +61,7 @@ const ProtectedRoute = ({ children, roles = [] }: ProtectedRouteProps) => {
         } else if (user.role === 'chef') {
           navigate('/kitchen'); 
         } else if (user.role === 'admin') {
+          // Admin should have access to all pages, but just in case there are future role restrictions
           navigate('/system');
         } else {
           navigate('/dashboard');
