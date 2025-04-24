@@ -1,7 +1,25 @@
+/**
+ * Menu Controller
+ * 
+ * This module handles menu-related operations including retrieving, creating,
+ * updating, and deleting menu items.
+ * 
+ * @module controllers/menuController
+ */
 import { Request, Response } from 'express';
 import { storage } from '../storage';
 import { InsertMenuItem } from '@shared/schema';
 
+/**
+ * GET /menu
+ * Fetch menu items, optionally filtered by category
+ * 
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Array} List of menu items
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const getMenuItems = async (req: Request, res: Response) => {
   try {
     const { category } = req.query;
