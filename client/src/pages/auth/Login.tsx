@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'wouter';
+import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +29,6 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isStaffLogin, setIsStaffLogin] = useState(true);
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const [_, navigate] = useLocation();
@@ -81,19 +81,24 @@ const Login = () => {
   };
 
   /**
-   * Toggle between staff and admin login forms
-   * Redirects to admin login page for admin login
+   * Navigate to admin login page
    */
-  const handleToggleLoginType = () => {
-    setIsStaffLogin(!isStaffLogin);
-    if (!isStaffLogin) {
-      navigate('/admin');
-    }
+  const handleAdminLogin = () => {
+    navigate('/admin');
   };
 
   return (
     <div className="h-screen flex items-center justify-center bg-background">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleAdminLogin}
+          title="Admin Login"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
         <ThemeToggle />
       </div>
       
@@ -101,29 +106,10 @@ const Login = () => {
         <CardContent className="pt-6">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-semibold text-foreground font-poppins">Mag7 POS</h1>
-            <p className="text-muted-foreground mt-2">Sign in to continue</p>
+            <p className="text-muted-foreground mt-2">Staff Sign In</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-2 justify-center mb-4">
-              <Button 
-                type="button"
-                variant={isStaffLogin ? "default" : "outline"}
-                onClick={() => setIsStaffLogin(true)}
-                className="rounded-full text-sm px-4"
-              >
-                Staff Login
-              </Button>
-              <Button 
-                type="button"
-                variant={!isStaffLogin ? "default" : "outline"}
-                onClick={handleToggleLoginType}
-                className="rounded-full text-sm px-4"
-              >
-                Admin Login
-              </Button>
-            </div>
-            
             <div className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>

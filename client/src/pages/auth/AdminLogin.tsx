@@ -93,23 +93,6 @@ const AdminLogin = () => {
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-2 justify-center mb-4">
-              <Button 
-                type="button"
-                variant="outline"
-                onClick={handleGoToStaffLogin}
-                className="rounded-full text-sm px-4"
-              >
-                Staff Login
-              </Button>
-              <Button 
-                type="button"
-                variant="default"
-                className="rounded-full text-sm px-4"
-              >
-                Admin Login
-              </Button>
-            </div>
             
             <div className="space-y-4">
               <div>
@@ -140,7 +123,7 @@ const AdminLogin = () => {
             <Button 
               type="submit" 
               variant="default"
-              className="w-full font-medium bg-admin hover:bg-admin/90"
+              className="w-full font-medium bg-rose-500 hover:bg-rose-600 text-white"
               disabled={loading}
             >
               {loading ? "Signing in..." : "Sign In as Admin"}
