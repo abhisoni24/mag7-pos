@@ -1,0 +1,42 @@
+Perfect! Here's a **tailored prompt** you can give to an AI agent working on your **Restaurant POS system built using the MERN stack** (MongoDB, Express.js, React, Node.js). The goal is to annotate the entire project with clean, standardized documentation comments that can be used later to auto-generate helpful documentation.
+
+---
+
+**📌 Tailored AI Agent Prompt for POS Project Documentation:**
+
+> You are tasked with adding comprehensive documentation comments throughout my **Restaurant POS system** project, which is built using the **MERN stack** (MongoDB, Express.js, React, Node.js).  
+>
+> This documentation should follow the best practices for each technology:
+>
+> - **Node.js/Express (JavaScript/TypeScript backend):** Use **JSDoc** format for all functions, classes, routes, middlewares, and utilities.
+> - **React frontend (JavaScript or TypeScript):** Add JSDoc-style comments above components, hooks, props, and utility functions.
+> - **MongoDB Models (Mongoose):** Add comments for schema definitions, virtuals, and model methods explaining their structure and usage.
+>
+> 📄 For every documented item, include:
+> 1. **What** it does (purpose)
+> 2. **Parameters** (name, type, and purpose)
+> 3. **Returns** (if applicable)
+> 4. Any **side effects** or errors thrown
+> 5. Where useful, add **inline comments** inside complex logic blocks
+> 6. In React, explain what the component represents and how props/state are used
+>
+> 🔁 Do not change any functionality—only add or improve documentation.  
+> 🧾 Make sure your comments are clean, professional, and compatible with tools like **JSDoc, Swagger (for Express APIs)**, and **React Styleguidist or Storybook (for UI components)**.
+>
+> 📚 Example documentation style (for Express route):
+> ```js
+> /**
+>  * GET /orders/:id
+>  * Fetch a specific order by ID
+>  * @param {Request} req - Express request object
+>  * @param {Response} res - Express response object
+>  * @returns {Object} Order document
+>  * @throws {404} If order is not found
+>  */
+> ```
+>
+> ✅ Your objective is to make the codebase easily understandable for new developers and ready for auto-documentation generation.
+
+---
+
+Would you like a version of this saved in a `README-dev.md` file or something that can be dropped into the repo for contributors?
