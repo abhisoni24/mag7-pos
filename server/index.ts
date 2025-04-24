@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -59,11 +61,14 @@ app.use((req, res, next) => {
   // Use environment variable for port or default to 5000
   // this allows running locally without conflicts
   const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    // Remove replit-specific option
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  server.listen(
+    {
+      port,
+      host: "0.0.0.0",
+      // Remove replit-specific option
+    },
+    () => {
+      log(`serving on port ${port}`);
+    }
+  );
 })();

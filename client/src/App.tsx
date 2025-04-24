@@ -20,11 +20,13 @@ import SystemAdmin from "./pages/system/SystemAdmin";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
+import dotenv from "dotenv";
+dotenv.config();
 
 function App() {
   // Set up light mode by default
   useEffect(() => {
-    document.body.classList.remove('dark');
+    document.body.classList.remove("dark");
   }, []);
 
   return (
@@ -36,7 +38,7 @@ function App() {
               {/* Auth Routes */}
               <Route path="/" component={Login} />
               <Route path="/admin" component={AdminLogin} />
-              
+
               {/* Protected Routes with Layout */}
               <Route path="/dashboard">
                 <ProtectedRoute roles={["waiter", "manager", "owner", "admin"]}>
@@ -45,15 +47,17 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/tables">
-                <ProtectedRoute roles={["host", "waiter", "manager", "owner", "admin"]}>
+                <ProtectedRoute
+                  roles={["host", "waiter", "manager", "owner", "admin"]}
+                >
                   <Layout>
                     <Tables />
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/orders">
                 <ProtectedRoute roles={["waiter", "manager", "owner", "admin"]}>
                   <Layout>
@@ -61,7 +65,7 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/kitchen">
                 <ProtectedRoute roles={["chef", "admin"]}>
                   <Layout>
@@ -69,7 +73,7 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/payments">
                 <ProtectedRoute roles={["waiter", "manager", "owner", "admin"]}>
                   <Layout>
@@ -77,7 +81,7 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/menu">
                 <ProtectedRoute roles={["manager", "owner", "admin"]}>
                   <Layout>
@@ -85,7 +89,7 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/staff">
                 <ProtectedRoute roles={["manager", "owner", "admin"]}>
                   <Layout>
@@ -93,7 +97,7 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/reports">
                 <ProtectedRoute roles={["owner", "admin"]}>
                   <Layout>
@@ -101,7 +105,7 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               </Route>
-              
+
               <Route path="/system">
                 <ProtectedRoute roles={["admin"]}>
                   <Layout>
