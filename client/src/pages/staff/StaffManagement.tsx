@@ -100,6 +100,13 @@ const StaffManagement = () => {
     dispatch(fetchStaff());
   }, [dispatch]);
   
+  // Debug staff data
+  useEffect(() => {
+    if (staff.length > 0) {
+      console.log("Staff data:", staff);
+    }
+  }, [staff]);
+  
   // Filter staff by role
   const filteredStaff = staff.filter(member => {
     if (activeTab === 'all') return true;
