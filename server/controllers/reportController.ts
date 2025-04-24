@@ -128,6 +128,17 @@ export const getRevenue = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * GET /reports/order-statistics
+ * Get comprehensive order statistics within a date range
+ * 
+ * @param {Request} req - Express request object with startDate and endDate query params
+ * @param {Response} res - Express response object
+ * @returns {Object} Order statistics including total count, breakdown by status,
+ *                   average order amount, and distribution by day of week
+ * @throws {400} If date params are missing or invalid
+ * @throws {500} If there's a server error
+ */
 export const getOrderStatistics = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;

@@ -164,6 +164,19 @@ export const createStaffMember = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * PUT /staff/:id
+ * Update an existing staff member
+ * Permission based on role hierarchy: admin > owner > manager
+ * 
+ * @param {Request} req - Express request object with authenticated user
+ * @param {Response} res - Express response object
+ * @returns {Object} Updated staff member with sanitized information (no password)
+ * @throws {403} If user lacks permission to update staff to specified role
+ * @throws {404} If staff member is not found
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const updateStaffMember = async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
@@ -218,6 +231,19 @@ export const updateStaffMember = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * DELETE /staff/:id
+ * Deactivate a staff member (not permanent deletion)
+ * Permission based on role hierarchy: admin > owner > manager
+ * 
+ * @param {Request} req - Express request object with authenticated user
+ * @param {Response} res - Express response object
+ * @returns {Object} Success message
+ * @throws {403} If user lacks permission to delete staff member
+ * @throws {404} If staff member is not found
+ * @throws {400} If there's a validation error
+ * @throws {500} If there's a server error
+ */
 export const deleteStaffMember = async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
@@ -263,7 +289,13 @@ export const deleteStaffMember = async (req: Request, res: Response) => {
   }
 };
 
-// Helper function to validate role permissions
+/**
+ * Helper function to validate role permissions based on hierarchy
+ * 
+ * @param {string} userRole - The role of the authenticated user making the request
+ * @param {string} targetRole - The role being assigned to or modified for a staff member
+ * @returns {boolean} Whether the user has permission to manage the target role
+ */
 function validateRolePermission(userRole?: string, targetRole?: string): boolean {
   if (!userRole || !targetRole) return false;
   
