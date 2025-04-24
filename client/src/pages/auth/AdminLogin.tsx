@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'wouter';
+import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -81,8 +82,19 @@ const AdminLogin = () => {
 
   return (
     <div className="h-screen flex items-center justify-center bg-background">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
         <ThemeToggle />
+      </div>
+      <div className="absolute top-4 left-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleGoToStaffLogin}
+          className="text-muted-foreground hover:text-foreground flex items-center gap-1"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Staff Login
+        </Button>
       </div>
       
       <Card className="w-full max-w-md mx-4">
