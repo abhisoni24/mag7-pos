@@ -367,7 +367,7 @@ export class MongoDBStorage implements IStorage {
     }
 
     const menuItem = await this.db
-      .collection<MongoMenuItem>("menu_items")
+      .collection<MongoMenuItem>("menuItems")
       .findOne({
         _id: new ObjectId(id),
       });
@@ -385,7 +385,7 @@ export class MongoDBStorage implements IStorage {
     }
 
     const menuItems = await this.db
-      .collection<MongoMenuItem>("menu_items")
+      .collection<MongoMenuItem>("menuItems")
       .find()
       .toArray();
 
