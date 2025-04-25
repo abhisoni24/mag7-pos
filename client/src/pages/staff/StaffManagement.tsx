@@ -1,33 +1,33 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   fetchStaff,
   StaffMember,
   createStaffMember,
   updateStaffMember,
-  deleteStaffMember
-} from '../../redux/staffSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+  deleteStaffMember,
+} from "../../redux/staffSlice";
+import { AppDispatch, RootState } from "../../redux/store";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableHeader,
   TableRow,
   TableHead,
   TableBody,
-  TableCell
-} from '@/components/ui/table';
+  TableCell,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -45,179 +45,292 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserRole } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Edit, Trash2, UserCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserRole } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { PlusCircle, Edit, Trash2, UserCircle } from "lucide-react";
 
-// Helper function to get role display name
+/**
+ * @function getRoleDisplayName
+ * @description Helper function to get the display name for a given user role.
+ * @param {string} role - The user role.
+ * @returns {string} - The display name of the role.
+ */
 const getRoleDisplayName = (role: string): string => {
-  switch(role) {
-    case UserRole.HOST: return 'Host';
-    case UserRole.WAITER: return 'Waiter';
-    case UserRole.CHEF: return 'Chef';
-    case UserRole.MANAGER: return 'Manager';
-    case UserRole.OWNER: return 'Owner';
-    case UserRole.ADMIN: return 'Admin';
-    default: return role;
+  switch (role) {
+    case UserRole.HOST:
+      return "Host";
+    case UserRole.WAITER:
+      return "Waiter";
+    case UserRole.CHEF:
+      return "Chef";
+    case UserRole.MANAGER:
+      return "Manager";
+    case UserRole.OWNER:
+      return "Owner";
+    case UserRole.ADMIN:
+      return "Admin";
+    default:
+      return role;
   }
 };
 
-// Helper to get role badge style
+/**
+ * @function getRoleBadgeStyle
+ * @description Helper function to get the badge style for a given user role.
+ * @param {string} role - The user role.
+ * @returns {string} - The CSS class names for the badge style.
+ */
 const getRoleBadgeStyle = (role: string): string => {
-  switch(role) {
-    case UserRole.HOST: return 'bg-host text-white';
-    case UserRole.WAITER: return 'bg-waiter text-white';
-    case UserRole.CHEF: return 'bg-chef text-white';
-    case UserRole.MANAGER: return 'bg-manager text-white';
-    case UserRole.OWNER: return 'bg-owner text-white';
-    case UserRole.ADMIN: return 'bg-admin text-white';
-    default: return 'bg-gray-500 text-white';
+  switch (role) {
+    case UserRole.HOST:
+      return "bg-host text-white";
+    case UserRole.WAITER:
+      return "bg-waiter text-white";
+    case UserRole.CHEF:
+      return "bg-chef text-white";
+    case UserRole.MANAGER:
+      return "bg-manager text-white";
+    case UserRole.OWNER:
+      return "bg-owner text-white";
+    case UserRole.ADMIN:
+      return "bg-admin text-white";
+    default:
+      return "bg-gray-500 text-white";
   }
 };
 
+/**
+ * @component StaffManagement
+ * @description A page component for managing staff members, allowing users to add, edit, and delete staff.
+ * It displays staff members in a table, categorized by role, and provides dialogs for staff creation, modification, and deletion.
+ * @returns {JSX.Element} - The staff management page element.
+ */
 const StaffManagement = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { staff, loading } = useSelector((state: RootState) => state.staff);
   const { user } = useSelector((state: RootState) => state.auth);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const { toast } = useToast();
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: '',
-    active: true
+
+  /**
+   * @interface FormState
+   * @description Interface for the form state used in the add/edit staff member dialog.
+   * @param {string} name - The name of the staff member.
+   * @param {string} email - The email of the staff member.
+   * @param {string} password - The password of the staff member.
+   * @param {string} role - The role of the staff member.
+   * @param {boolean} active - Whether the staff member is currently active.
+   */
+  interface FormState {
+    name: string;
+    email: string;
+    password: string;
+    role: string;
+    active: boolean;
+  }
+
+  const [formData, setFormData] = useState<FormState>({
+    name: "",
+    email: "",
+    password: "",
+    role: "",
+    active: true,
   });
-  
+
+  /**
+   * @useEffect
+   * @description Fetches staff data from the Redux store on component mount.
+   */
   useEffect(() => {
     dispatch(fetchStaff());
   }, [dispatch]);
-  
+
   // Debug staff data
   useEffect(() => {
     if (staff.length > 0) {
       console.log("Staff data:", staff);
     }
   }, [staff]);
-  
+
   // Filter staff by role
-  const filteredStaff = staff.filter(member => {
-    if (activeTab === 'all') return true;
+  const filteredStaff = staff.filter((member) => {
+    if (activeTab === "all") return true;
     return member.role === activeTab;
   });
-  
-  // Check if current user can manage this role
+
+  /**
+   * @function canManageRole
+   * @description Checks if the current user has permission to manage a given role.
+   * @param {string} role - The role to check.
+   * @returns {boolean} - True if the user can manage the role, false otherwise.
+   */
   const canManageRole = (role: string): boolean => {
     if (!user) return false;
-    
+
     // Admin can manage all roles
     if (user.role === UserRole.ADMIN) return true;
-    
+
     // Owner can manage all except admin and other owners
     if (user.role === UserRole.OWNER) {
       return role !== UserRole.ADMIN && role !== UserRole.OWNER;
     }
-    
+
     // Manager can manage waiters, hosts, and chefs
     if (user.role === UserRole.MANAGER) {
-      return [UserRole.WAITER, UserRole.HOST, UserRole.CHEF].includes(role as UserRole);
+      return [UserRole.WAITER, UserRole.HOST, UserRole.CHEF].includes(
+        role as UserRole
+      );
     }
-    
+
     return false;
   };
-  
-  // Get available roles that can be managed
+
+  /**
+   * @function getAvailableRoles
+   * @description Gets the available roles that can be managed by the current user.
+   * @returns {UserRole[]} - An array of available roles.
+   */
   const getAvailableRoles = (): UserRole[] => {
     if (!user) return [];
-    
+
     if (user.role === UserRole.ADMIN) {
-      return [UserRole.HOST, UserRole.WAITER, UserRole.CHEF, UserRole.MANAGER, UserRole.OWNER, UserRole.ADMIN];
+      return [
+        UserRole.HOST,
+        UserRole.WAITER,
+        UserRole.CHEF,
+        UserRole.MANAGER,
+        UserRole.OWNER,
+        UserRole.ADMIN,
+      ];
     }
-    
+
     if (user.role === UserRole.OWNER) {
       return [UserRole.HOST, UserRole.WAITER, UserRole.CHEF, UserRole.MANAGER];
     }
-    
+
     if (user.role === UserRole.MANAGER) {
       return [UserRole.HOST, UserRole.WAITER, UserRole.CHEF];
     }
-    
+
     return [];
   };
-  
+
+  /**
+   * @function handleOpenAddDialog
+   * @description Opens the add staff member dialog and resets the form state.
+   */
   const handleOpenAddDialog = () => {
     setIsEditing(false);
     setSelectedStaff(null);
     setFormData({
-      name: '',
-      email: '',
-      password: '',
+      name: "",
+      email: "",
+      password: "",
       role: getAvailableRoles()[0],
-      active: true
+      active: true,
     });
     setIsDialogOpen(true);
   };
-  
+
+  /**
+   * @function handleOpenEditDialog
+   * @description Opens the edit staff member dialog and populates the form with the selected staff member's data.
+   * @param {StaffMember} member - The staff member to edit.
+   */
   const handleOpenEditDialog = (member: StaffMember) => {
     if (!canManageRole(member.role)) {
       toast({
         variant: "destructive",
         title: "Permission denied",
-        description: `You don't have permission to edit ${getRoleDisplayName(member.role)}s.`,
+        description: `You don't have permission to edit ${getRoleDisplayName(
+          member.role
+        )}s.`,
       });
       return;
     }
-    
+
     setIsEditing(true);
     setSelectedStaff(member);
     setFormData({
       name: member.name,
       email: member.email,
-      password: '', // Don't include current password
+      password: "", // Don't include current password
       role: member.role,
-      active: member.active
+      active: member.active,
     });
     setIsDialogOpen(true);
   };
-  
+
+  /**
+   * @function handleOpenDeleteDialog
+   * @description Opens the delete confirmation dialog for the selected staff member.
+   * @param {StaffMember} member - The staff member to delete.
+   */
   const handleOpenDeleteDialog = (member: StaffMember) => {
     if (!canManageRole(member.role)) {
       toast({
         variant: "destructive",
         title: "Permission denied",
-        description: `You don't have permission to delete ${getRoleDisplayName(member.role)}s.`,
+        description: `You don't have permission to delete ${getRoleDisplayName(
+          member.role
+        )}s.`,
       });
       return;
     }
-    
+
     setSelectedStaff(member);
     setIsDeleteDialogOpen(true);
   };
-  
+
+  /**
+   * @function handleInputChange
+   * @description Handles changes to input fields in the add/edit staff member dialog.
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event.
+   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
+  /**
+   * @function handleSwitchChange
+   * @description Handles changes to switch components in the add/edit staff member dialog.
+   * @param {string} name - The name of the form field to update.
+   * @param {boolean} checked - The new value of the switch.
+   */
   const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData(prev => ({ ...prev, [name]: checked }));
+    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
-  
+
+  /**
+   * @function handleSelectChange
+   * @description Handles changes to select components in the add/edit staff member dialog.
+   * @param {string} name - The name of the form field to update.
+   * @param {string} value - The new value of the select component.
+   */
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
+  /**
+   * @function handleSubmit
+   * @description Handles the submission of the add/edit staff member form.
+   * It dispatches the appropriate Redux action to create or update the staff member.
+   */
   const handleSubmit = async () => {
     try {
       // Validate form
-      if (!formData.name || !formData.email || (!isEditing && !formData.password) || !formData.role) {
+      if (
+        !formData.name ||
+        !formData.email ||
+        (!isEditing && !formData.password) ||
+        !formData.role
+      ) {
         toast({
           variant: "destructive",
           title: "Validation error",
@@ -225,79 +338,90 @@ const StaffManagement = () => {
         });
         return;
       }
-      
+
       if (!canManageRole(formData.role)) {
         toast({
           variant: "destructive",
           title: "Permission denied",
-          description: `You don't have permission to manage ${getRoleDisplayName(formData.role)}s.`,
+          description: `You don't have permission to manage ${getRoleDisplayName(
+            formData.role
+          )}s.`,
         });
         return;
       }
-      
+
       if (isEditing && selectedStaff) {
         const updateData: any = {
           name: formData.name,
           email: formData.email,
           role: formData.role,
-          active: formData.active
+          active: formData.active,
         };
-        
+
         // Only include password if it was changed
         if (formData.password) {
           updateData.password = formData.password;
         }
-        
-        await dispatch(updateStaffMember({ 
-          id: selectedStaff.id, 
-          data: updateData 
-        })).unwrap();
-        
+
+        await dispatch(
+          updateStaffMember({
+            id: selectedStaff.id,
+            data: updateData,
+          })
+        ).unwrap();
+
         toast({
           title: "Staff member updated",
           description: `${formData.name} has been updated successfully.`,
         });
       } else {
-        await dispatch(createStaffMember({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role
-        })).unwrap();
-        
+        await dispatch(
+          createStaffMember({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          })
+        ).unwrap();
+
         toast({
           title: "Staff member created",
           description: `${formData.name} has been added to the staff.`,
         });
       }
-      
+
       setIsDialogOpen(false);
     } catch (error) {
       toast({
         variant: "destructive",
         title: isEditing ? "Update failed" : "Creation failed",
-        description: error as string || "An error occurred",
+        description: (error as string) || "An error occurred",
       });
     }
   };
-  
+
+  /**
+   * @function handleDelete
+   * @description Handles the deletion of a staff member.
+   * It dispatches the deleteStaffMember Redux action and displays a toast notification.
+   */
   const handleDelete = async () => {
     if (!selectedStaff) return;
-    
+
     try {
       await dispatch(deleteStaffMember(selectedStaff.id)).unwrap();
-      
+
       toast({
         title: "Staff member deleted",
         description: `${selectedStaff.name} has been removed from the staff.`,
       });
-      
+
       setIsDeleteDialogOpen(false);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Delete failed",
-        description: error as string || "An error occurred",
+        description: (error as string) || "An error occurred",
       });
     }
   };
@@ -327,7 +451,7 @@ const StaffManagement = () => {
                 <TabsTrigger value={UserRole.ADMIN}>Admins</TabsTrigger>
               )}
             </TabsList>
-            
+
             <TabsContent value={activeTab}>
               {loading ? (
                 <div className="flex justify-center items-center h-40">
@@ -346,7 +470,7 @@ const StaffManagement = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredStaff.map(member => (
+                      {filteredStaff.map((member) => (
                         <TableRow key={member.id}>
                           <TableCell className="font-medium">
                             <div className="flex items-center">
@@ -358,28 +482,36 @@ const StaffManagement = () => {
                           </TableCell>
                           <TableCell>{member.email}</TableCell>
                           <TableCell>
-                            <span className={`px-2 py-1 rounded-full text-xs ${getRoleBadgeStyle(member.role)}`}>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs ${getRoleBadgeStyle(
+                                member.role
+                              )}`}
+                            >
                               {getRoleDisplayName(member.role)}
                             </span>
                           </TableCell>
                           <TableCell>
                             {member.active ? (
-                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span>
+                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                                Active
+                              </span>
                             ) : (
-                              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Inactive</span>
+                              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+                                Inactive
+                              </span>
                             )}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleOpenEditDialog(member)}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 className="text-red-500 hover:text-red-700"
                                 onClick={() => handleOpenDeleteDialog(member)}
@@ -390,11 +522,15 @@ const StaffManagement = () => {
                           </TableCell>
                         </TableRow>
                       ))}
-                      
+
                       {filteredStaff.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                            No staff members found. Add a staff member to get started.
+                          <TableCell
+                            colSpan={5}
+                            className="text-center py-8 text-gray-500"
+                          >
+                            No staff members found. Add a staff member to get
+                            started.
                           </TableCell>
                         </TableRow>
                       )}
@@ -406,14 +542,16 @@ const StaffManagement = () => {
           </Tabs>
         </CardContent>
       </Card>
-      
+
       {/* Add/Edit Staff Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit Staff Member' : 'Add Staff Member'}</DialogTitle>
+            <DialogTitle>
+              {isEditing ? "Edit Staff Member" : "Add Staff Member"}
+            </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -426,7 +564,7 @@ const StaffManagement = () => {
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -439,10 +577,12 @@ const StaffManagement = () => {
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">
-                {isEditing ? 'New Password (leave empty to keep current)' : 'Password'}
+                {isEditing
+                  ? "New Password (leave empty to keep current)"
+                  : "Password"}
               </Label>
               <Input
                 id="password"
@@ -450,64 +590,79 @@ const StaffManagement = () => {
                 type="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder={isEditing ? 'Leave blank to keep current password' : 'Create a password'}
+                placeholder={
+                  isEditing
+                    ? "Leave blank to keep current password"
+                    : "Create a password"
+                }
                 required={!isEditing}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <Select 
-                value={formData.role} 
-                onValueChange={(value) => handleSelectChange('role', value)}
+              <Select
+                value={formData.role}
+                onValueChange={(value) => handleSelectChange("role", value)}
                 disabled={isEditing && !canManageRole(formData.role)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {getAvailableRoles().map(role => (
-                    <SelectItem key={role} value={role}>{getRoleDisplayName(role)}</SelectItem>
+                  {getAvailableRoles().map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {getRoleDisplayName(role)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             {isEditing && (
               <div className="flex items-center space-x-2">
                 <Switch
                   id="active"
                   checked={formData.active}
-                  onCheckedChange={(checked) => handleSwitchChange('active', checked)}
+                  onCheckedChange={(checked) =>
+                    handleSwitchChange("active", checked)
+                  }
                 />
                 <Label htmlFor="active">Active</Label>
               </div>
             )}
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleSubmit}>
-              {isEditing ? 'Update Staff' : 'Add Staff'}
+              {isEditing ? "Update Staff" : "Add Staff"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove {selectedStaff?.name} from the staff. They will no longer have access to the system.
+              This will remove {selectedStaff?.name} from the staff. They will
+              no longer have access to the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 text-white hover:bg-red-600">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

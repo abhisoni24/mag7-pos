@@ -2,12 +2,27 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 
+/**
+ * @interface ThemeToggleProps
+ * @description Interface for the props of the ThemeToggle component.
+ * @param {string} [variant] - The variant of the button.
+ * @param {string} [size] - The size of the button.
+ */
 interface ThemeToggleProps {
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
 }
 
-export function ThemeToggle({ variant = "outline", size = "icon" }: ThemeToggleProps) {
+/**
+ * @component ThemeToggle
+ * @description A button component that toggles the theme between light and dark mode.
+ * @param {ThemeToggleProps} props - The props for the ThemeToggle component.
+ * @returns {JSX.Element} - The theme toggle button element.
+ */
+export function ThemeToggle({
+  variant = "outline",
+  size = "icon",
+}: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
 
   return (

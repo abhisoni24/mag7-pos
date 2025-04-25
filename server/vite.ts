@@ -8,6 +8,11 @@ import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
 
+/**
+ * Logs a message to the console with a timestamp and source.
+ * @param message - The message to log.
+ * @param source - The source of the log (default is "express").
+ */
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -19,6 +24,11 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+/**
+ * Sets up Vite as middleware for the Express application.
+ * @param app - The Express application instance.
+ * @param server - The HTTP server instance.
+ */
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
@@ -40,7 +50,10 @@ export async function setupVite(app: Express, server: Server) {
     appType: "custom",
   });
 
+  // Use Vite's middleware
   app.use(vite.middlewares);
+
+  // Serve the client application
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
@@ -49,14 +62,14 @@ export async function setupVite(app: Express, server: Server) {
         import.meta.dirname,
         "..",
         "client",
-        "index.html",
+        "index.html"
       );
 
-      // always reload the index.html file from disk incase it changes
+      // Always reload the index.html file from disk in case it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`,
+        `src="/src/main.tsx?v=${nanoid()}"`
       );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
@@ -67,18 +80,24 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+/**
+ * Serves static files from the "public" directory and falls back to index.html for unmatched routes.
+ * @param app - The Express application instance.
+ * @throws Will throw an error if the "public" directory does not exist.
+ */
 export function serveStatic(app: Express) {
   const distPath = path.resolve(import.meta.dirname, "public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
 
+  // Serve static files
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
+  // Fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });

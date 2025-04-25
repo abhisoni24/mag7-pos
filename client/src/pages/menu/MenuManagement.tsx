@@ -1,34 +1,34 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchMenuItems, 
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchMenuItems,
   MenuItem,
   createMenuItem,
   updateMenuItem,
-  deleteMenuItem
-} from '../../redux/menuSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { 
-  Table, 
-  TableHeader, 
-  TableRow, 
-  TableHead, 
-  TableBody, 
-  TableCell 
-} from '@/components/ui/table';
+  deleteMenuItem,
+} from "../../redux/menuSlice";
+import { AppDispatch, RootState } from "../../redux/store";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -46,11 +46,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MenuItemCategory } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MenuItemCategory } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { PlusCircle, Edit, Trash2 } from "lucide-react";
 
+/**
+ * @component MenuManagement
+ * @description A page component for managing menu items, allowing users to add, edit, and delete items.
+ * It displays menu items in a table, categorized by type, and provides dialogs for item creation, modification, and deletion.
+ * @returns {JSX.Element} - The menu management page element.
+ */
 const MenuManagement = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { items, loading } = useSelector((state: RootState) => state.menu);
@@ -60,70 +66,130 @@ const MenuManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const { toast } = useToast();
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
+
+  /**
+   * @interface FormState
+   * @description Interface for the form state used in the add/edit menu item dialog.
+   * @param {string} name - The name of the menu item.
+   * @param {string} description - The description of the menu item.
+   * @param {string} price - The price of the menu item.
+   * @param {MenuItemCategory} category - The category of the menu item.
+   * @param {boolean} available - Whether the menu item is currently available.
+   * @param {boolean} isSpecial - Whether the menu item is marked as special.
+   */
+  interface FormState {
+    name: string;
+    description: string;
+    price: string;
+    category: MenuItemCategory;
+    available: boolean;
+    isSpecial: boolean;
+  }
+
+  const [formData, setFormData] = useState<FormState>({
+    name: "",
+    description: "",
+    price: "",
     category: MenuItemCategory.APPETIZER,
     available: true,
-    isSpecial: false
+    isSpecial: false,
   });
-  
+
+  /**
+   * @useEffect
+   * @description Fetches menu items from the Redux store on component mount.
+   */
   useEffect(() => {
     dispatch(fetchMenuItems());
   }, [dispatch]);
-  
+
   // Filter items by category
-  const filteredItems = items.filter(item => item.category === activeTab);
-  
+  const filteredItems = items.filter((item) => item.category === activeTab);
+
+  /**
+   * @function handleOpenAddDialog
+   * @description Opens the add menu item dialog and resets the form state.
+   */
   const handleOpenAddDialog = () => {
     setIsEditing(false);
     setSelectedItem(null);
     setFormData({
-      name: '',
-      description: '',
-      price: '',
+      name: "",
+      description: "",
+      price: "",
       category: activeTab,
       available: true,
-      isSpecial: false
+      isSpecial: false,
     });
     setIsDialogOpen(true);
   };
-  
+
+  /**
+   * @function handleOpenEditDialog
+   * @description Opens the edit menu item dialog and populates the form with the selected item's data.
+   * @param {MenuItem} item - The menu item to edit.
+   */
   const handleOpenEditDialog = (item: MenuItem) => {
     setIsEditing(true);
     setSelectedItem(item);
     setFormData({
       name: item.name,
-      description: item.description || '',
+      description: item.description || "",
       price: item.price.toString(),
       category: item.category,
       available: item.available,
-      isSpecial: item.isSpecial
+      isSpecial: item.isSpecial,
     });
     setIsDialogOpen(true);
   };
-  
+
+  /**
+   * @function handleOpenDeleteDialog
+   * @description Opens the delete confirmation dialog for the selected menu item.
+   * @param {MenuItem} item - The menu item to delete.
+   */
   const handleOpenDeleteDialog = (item: MenuItem) => {
     setSelectedItem(item);
     setIsDeleteDialogOpen(true);
   };
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  /**
+   * @function handleInputChange
+   * @description Handles changes to input fields in the add/edit menu item dialog.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - The change event.
+   */
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
+  /**
+   * @function handleSwitchChange
+   * @description Handles changes to switch components in the add/edit menu item dialog.
+   * @param {string} name - The name of the form field to update.
+   * @param {boolean} checked - The new value of the switch.
+   */
   const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData(prev => ({ ...prev, [name]: checked }));
+    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
-  
+
+  /**
+   * @function handleSelectChange
+   * @description Handles changes to select components in the add/edit menu item dialog.
+   * @param {string} name - The name of the form field to update.
+   * @param {string} value - The new value of the select component.
+   */
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
+  /**
+   * @function handleSubmit
+   * @description Handles the submission of the add/edit menu item form.
+   * It dispatches the appropriate Redux action to create or update the menu item.
+   */
   const handleSubmit = async () => {
     try {
       const menuItemData = {
@@ -132,71 +198,84 @@ const MenuManagement = () => {
         price: formData.price, // Keep it as a string to match the backend expectation
         category: formData.category,
         available: formData.available,
-        isSpecial: formData.isSpecial
+        isSpecial: formData.isSpecial,
       };
-      
+
       if (isEditing && selectedItem) {
-        await dispatch(updateMenuItem({ 
-          id: selectedItem._id, 
-          data: menuItemData 
-        })).unwrap();
-        
+        await dispatch(
+          updateMenuItem({
+            id: selectedItem._id,
+            data: menuItemData,
+          })
+        ).unwrap();
+
         toast({
           title: "Menu item updated",
           description: `${formData.name} has been updated successfully.`,
         });
       } else {
         await dispatch(createMenuItem(menuItemData)).unwrap();
-        
+
         toast({
           title: "Menu item created",
           description: `${formData.name} has been added to the menu.`,
         });
       }
-      
+
       setIsDialogOpen(false);
     } catch (error) {
       toast({
         variant: "destructive",
         title: isEditing ? "Update failed" : "Creation failed",
-        description: error as string || "An error occurred",
+        description: (error as string) || "An error occurred",
       });
     }
   };
-  
+
+  /**
+   * @function handleDelete
+   * @description Handles the deletion of a menu item.
+   * It dispatches the deleteMenuItem Redux action and displays a toast notification.
+   */
   const handleDelete = async () => {
     if (!selectedItem) return;
-    
+
     try {
       await dispatch(deleteMenuItem(selectedItem._id)).unwrap();
-      
+
       toast({
         title: "Menu item deleted",
         description: `${selectedItem.name} has been removed from the menu.`,
       });
-      
+
       setIsDeleteDialogOpen(false);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Delete failed",
-        description: error as string || "An error occurred",
+        description: (error as string) || "An error occurred",
       });
     }
   };
-  
+
+  /**
+   * @function getCategoryLabel
+   * @description Returns a user-friendly label for a menu item category.
+   * @param {string} category - The menu item category.
+   * @returns {string} - The user-friendly label for the category.
+   */
   const getCategoryLabel = (category: string) => {
     switch (category) {
       case MenuItemCategory.APPETIZER:
-        return 'Appetizer';
+        return "Appetizer";
       case MenuItemCategory.MAIN_COURSE:
-        return 'Main Course';
+        return "Main Course";
       case MenuItemCategory.SIDE:
-        return 'Side';
+        return "Side";
       case MenuItemCategory.DESSERT:
-        return 'Dessert';
+        return "Dessert";
       case MenuItemCategory.DRINK:
-        return 'Drink';
+        return "Drink";
       default:
         return category;
     }
@@ -215,13 +294,19 @@ const MenuManagement = () => {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
-              <TabsTrigger value={MenuItemCategory.APPETIZER}>Appetizers</TabsTrigger>
-              <TabsTrigger value={MenuItemCategory.MAIN_COURSE}>Main Courses</TabsTrigger>
+              <TabsTrigger value={MenuItemCategory.APPETIZER}>
+                Appetizers
+              </TabsTrigger>
+              <TabsTrigger value={MenuItemCategory.MAIN_COURSE}>
+                Main Courses
+              </TabsTrigger>
               <TabsTrigger value={MenuItemCategory.SIDE}>Sides</TabsTrigger>
-              <TabsTrigger value={MenuItemCategory.DESSERT}>Desserts</TabsTrigger>
+              <TabsTrigger value={MenuItemCategory.DESSERT}>
+                Desserts
+              </TabsTrigger>
               <TabsTrigger value={MenuItemCategory.DRINK}>Drinks</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value={activeTab}>
               {loading ? (
                 <div className="flex justify-center items-center h-40">
@@ -241,36 +326,51 @@ const MenuManagement = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredItems.map(item => (
+                      {filteredItems.map((item) => (
                         <TableRow key={item._id}>
-                          <TableCell className="font-medium">{item.name}</TableCell>
-                          <TableCell>{item.description || '-'}</TableCell>
-                          <TableCell>${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</TableCell>
+                          <TableCell className="font-medium">
+                            {item.name}
+                          </TableCell>
+                          <TableCell>{item.description || "-"}</TableCell>
+                          <TableCell>
+                            $
+                            {typeof item.price === "number"
+                              ? item.price.toFixed(2)
+                              : item.price}
+                          </TableCell>
                           <TableCell>
                             {item.available ? (
-                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Yes</span>
+                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                                Yes
+                              </span>
                             ) : (
-                              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">No</span>
+                              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+                                No
+                              </span>
                             )}
                           </TableCell>
                           <TableCell>
                             {item.isSpecial ? (
-                              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Yes</span>
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                Yes
+                              </span>
                             ) : (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">No</span>
+                              <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                                No
+                              </span>
                             )}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleOpenEditDialog(item)}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 className="text-red-500 hover:text-red-700"
                                 onClick={() => handleOpenDeleteDialog(item)}
@@ -281,11 +381,15 @@ const MenuManagement = () => {
                           </TableCell>
                         </TableRow>
                       ))}
-                      
+
                       {filteredItems.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                            No items found in this category. Add an item to get started.
+                          <TableCell
+                            colSpan={6}
+                            className="text-center py-8 text-gray-500"
+                          >
+                            No items found in this category. Add an item to get
+                            started.
                           </TableCell>
                         </TableRow>
                       )}
@@ -297,14 +401,16 @@ const MenuManagement = () => {
           </Tabs>
         </CardContent>
       </Card>
-      
+
       {/* Add/Edit Item Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit Menu Item' : 'Add Menu Item'}</DialogTitle>
+            <DialogTitle>
+              {isEditing ? "Edit Menu Item" : "Add Menu Item"}
+            </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -317,7 +423,7 @@ const MenuManagement = () => {
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -328,7 +434,7 @@ const MenuManagement = () => {
                 placeholder="Item description"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="price">Price ($)</Label>
               <Input
@@ -343,68 +449,85 @@ const MenuManagement = () => {
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => handleSelectChange('category', value)}
+              <Select
+                value={formData.category}
+                onValueChange={(value) => handleSelectChange("category", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={MenuItemCategory.APPETIZER}>Appetizer</SelectItem>
-                  <SelectItem value={MenuItemCategory.MAIN_COURSE}>Main Course</SelectItem>
+                  <SelectItem value={MenuItemCategory.APPETIZER}>
+                    Appetizer
+                  </SelectItem>
+                  <SelectItem value={MenuItemCategory.MAIN_COURSE}>
+                    Main Course
+                  </SelectItem>
                   <SelectItem value={MenuItemCategory.SIDE}>Side</SelectItem>
-                  <SelectItem value={MenuItemCategory.DESSERT}>Dessert</SelectItem>
+                  <SelectItem value={MenuItemCategory.DESSERT}>
+                    Dessert
+                  </SelectItem>
                   <SelectItem value={MenuItemCategory.DRINK}>Drink</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Switch
                 id="available"
                 checked={formData.available}
-                onCheckedChange={(checked) => handleSwitchChange('available', checked)}
+                onCheckedChange={(checked) =>
+                  handleSwitchChange("available", checked)
+                }
               />
               <Label htmlFor="available">Available</Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Switch
                 id="isSpecial"
                 checked={formData.isSpecial}
-                onCheckedChange={(checked) => handleSwitchChange('isSpecial', checked)}
+                onCheckedChange={(checked) =>
+                  handleSwitchChange("isSpecial", checked)
+                }
               />
               <Label htmlFor="isSpecial">Mark as Special</Label>
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleSubmit}>
-              {isEditing ? 'Update Item' : 'Add Item'}
+              {isEditing ? "Update Item" : "Add Item"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove {selectedItem?.name} from the menu. This action cannot be undone.
+              This will remove {selectedItem?.name} from the menu. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 text-white hover:bg-red-600">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

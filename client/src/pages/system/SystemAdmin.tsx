@@ -53,6 +53,12 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+/**
+ * @component SystemAdmin
+ * @description A page component for system administrators to manage users, database, security, and system settings.
+ * It provides tabs for managing admin users, backing up/restoring/resetting the database, configuring security settings, and setting system-wide configurations.
+ * @returns {JSX.Element} - The system administration page element.
+ */
 const SystemAdmin = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { staff, loading } = useSelector((state: RootState) => state.staff);
@@ -61,18 +67,41 @@ const SystemAdmin = () => {
   const [isResettingDB, setIsResettingDB] = useState(false);
   const { toast } = useToast();
 
+  /**
+   * @interface FormState
+   * @description Interface for the form state used in the add admin user dialog.
+   * @param {string} name - The full name of the admin user.
+   * @param {string} email - The email address of the admin user.
+   * @param {string} password - The password for the admin user.
+   * @param {string} role - The role of the admin user (always UserRole.ADMIN).
+   */
+  interface FormState {
+    name: string;
+    email: string;
+    password: string;
+    role: string;
+  }
+
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormState>({
     name: "",
     email: "",
     password: "",
     role: UserRole.ADMIN,
   });
 
+  /**
+   * @useEffect
+   * @description Fetches staff data from the Redux store on component mount.
+   */
   useEffect(() => {
     dispatch(fetchStaff());
   }, [dispatch]);
 
+  /**
+   * @function handleOpenAddUserDialog
+   * @description Opens the add admin user dialog and resets the form state.
+   */
   const handleOpenAddUserDialog = () => {
     setFormData({
       name: "",
@@ -83,15 +112,31 @@ const SystemAdmin = () => {
     setIsUserDialogOpen(true);
   };
 
+  /**
+   * @function handleInputChange
+   * @description Handles changes to input fields in the add admin user dialog.
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event.
+   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * @function handleSelectChange
+   * @description Handles changes to select components in the add admin user dialog.
+   * @param {string} name - The name of the form field to update.
+   * @param {string} value - The new value of the select component.
+   */
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * @function handleCreateUser
+   * @description Handles the creation of a new admin user.
+   * It dispatches the createStaffMember action and displays a toast notification.
+   */
   const handleCreateUser = async () => {
     try {
       // Validate form
@@ -133,6 +178,11 @@ const SystemAdmin = () => {
     }
   };
 
+  /**
+   * @function simulateDBBackup
+   * @description Simulates a database backup process.
+   * In a real-world scenario, this would call an API endpoint to backup the database.
+   */
   const simulateDBBackup = async () => {
     try {
       // This would typically call an API endpoint to backup the database
@@ -152,6 +202,11 @@ const SystemAdmin = () => {
     }
   };
 
+  /**
+   * @function simulateDBRestore
+   * @description Simulates a database restore process.
+   * In a real-world scenario, this would call an API endpoint to restore the database from a backup.
+   */
   const simulateDBRestore = async () => {
     try {
       // This would typically call an API endpoint to restore the database
@@ -171,6 +226,11 @@ const SystemAdmin = () => {
     }
   };
 
+  /**
+   * @function simulateDBReset
+   * @description Simulates a database reset process.
+   * In a real-world scenario, this would call an API endpoint to reset the database to its initial state.
+   */
   const simulateDBReset = async () => {
     setIsResettingDB(true);
     try {
@@ -193,7 +253,12 @@ const SystemAdmin = () => {
     }
   };
 
-  // Get role display name
+  /**
+   * @function getRoleDisplayName
+   * @description Helper function to get the display name for a given user role.
+   * @param {string} role - The user role.
+   * @returns {string} - The display name of the role.
+   */
   const getRoleDisplayName = (role: string): string => {
     switch (role) {
       case UserRole.HOST:
@@ -213,7 +278,10 @@ const SystemAdmin = () => {
     }
   };
 
-  // Filter admin users
+  /**
+   * @constant adminUsers
+   * @description Filters the staff data to only include admin users.
+   */
   const adminUsers = staff.filter((user) => user.role === UserRole.ADMIN);
 
   return (

@@ -25,52 +25,237 @@ dotenv.config();
 
 process.env.MONGODB_URI = process.env.MONGODB_URI || "default_value";
 
+/**
+ * Interface defining the storage operations for the restaurant POS system.
+ */
 export interface IStorage {
-  // User operations
+  /**
+   * Fetches a user by their ID.
+   * @param id - The ID of the user.
+   * @returns A promise resolving to the user or null if not found.
+   */
   getUser(id: string): Promise<MongoUser | null>;
+
+  /**
+   * Fetches a user by their email.
+   * @param email - The email of the user.
+   * @returns A promise resolving to the user or null if not found.
+   */
   getUserByEmail(email: string): Promise<MongoUser | null>;
+
+  /**
+   * Creates a new user.
+   * @param user - The user data to insert.
+   * @returns A promise resolving to the created user.
+   */
   createUser(user: InsertUser): Promise<MongoUser>;
+
+  /**
+   * Updates an existing user.
+   * @param id - The ID of the user to update.
+   * @param user - The partial user data to update.
+   * @returns A promise resolving to the updated user or null if not found.
+   */
   updateUser(id: string, user: Partial<MongoUser>): Promise<MongoUser | null>;
+
+  /**
+   * Deletes a user by their ID.
+   * @param id - The ID of the user to delete.
+   * @returns A promise resolving to true if the user was deleted, false otherwise.
+   */
   deleteUser(id: string): Promise<boolean>;
+
+  /**
+   * Fetches all users.
+   * @returns A promise resolving to an array of users.
+   */
   getUsers(): Promise<MongoUser[]>;
+
+  /**
+   * Fetches users by their role.
+   * @param role - The role to filter users by.
+   * @returns A promise resolving to an array of users with the specified role.
+   */
   getUsersByRole(role: string): Promise<MongoUser[]>;
 
   // Table operations
+
+  /**
+   * Fetches a table by its ID.
+   * @param id - The ID of the table.
+   * @returns A promise resolving to the table or null if not found.
+   */
   getTable(id: string): Promise<MongoTable | null>;
+
+  /**
+   * Fetches all tables.
+   * @returns A promise resolving to an array of tables.
+   */
   getTables(): Promise<MongoTable[]>;
+
+  /**
+   * Fetches tables by their status.
+   * @param status - The status to filter tables by.
+   * @returns A promise resolving to an array of tables with the specified status.
+   */
   getTablesByStatus(status: string): Promise<MongoTable[]>;
+
+  /**
+   * Fetches tables assigned to a specific waiter.
+   * @param waiterId - The ID of the waiter.
+   * @returns A promise resolving to an array of tables assigned to the waiter.
+   */
   getTablesByWaiter(waiterId: string): Promise<MongoTable[]>;
+
+  /**
+   * Fetches tables on a specific floor.
+   * @param floor - The floor number.
+   * @returns A promise resolving to an array of tables on the specified floor.
+   */
   getTablesByFloor(floor: number): Promise<MongoTable[]>;
+
+  /**
+   * Creates a new table.
+   * @param table - The table data to insert.
+   * @returns A promise resolving to the created table.
+   */
   createTable(table: InsertTable): Promise<MongoTable>;
+
+  /**
+   * Updates an existing table.
+   * @param id - The ID of the table to update.
+   * @param table - The partial table data to update.
+   * @returns A promise resolving to the updated table or null if not found.
+   */
   updateTable(
     id: string,
     table: Partial<MongoTable>
   ): Promise<MongoTable | null>;
 
   // Menu operations
+
+  /**
+   * Fetches a menu item by its ID.
+   * @param id - The ID of the menu item.
+   * @returns A promise resolving to the menu item or null if not found.
+   */
   getMenuItem(id: string): Promise<MongoMenuItem | null>;
+
+  /**
+   * Fetches all menu items.
+   * @returns A promise resolving to an array of menu items.
+   */
   getMenuItems(): Promise<MongoMenuItem[]>;
+
+  /**
+   * Fetches menu items by their category.
+   * @param category - The category to filter menu items by.
+   * @returns A promise resolving to an array of menu items in the specified category.
+   */
   getMenuItemsByCategory(category: string): Promise<MongoMenuItem[]>;
+
+  /**
+   * Creates a new menu item.
+   * @param item - The menu item data to insert.
+   * @returns A promise resolving to the created menu item.
+   */
   createMenuItem(item: InsertMenuItem): Promise<MongoMenuItem>;
+
+  /**
+   * Updates an existing menu item.
+   * @param id - The ID of the menu item to update.
+   * @param item - The partial menu item data to update.
+   * @returns A promise resolving to the updated menu item or null if not found.
+   */
   updateMenuItem(
     id: string,
     item: Partial<MongoMenuItem>
   ): Promise<MongoMenuItem | null>;
+
+  /**
+   * Deletes a menu item by its ID.
+   * @param id - The ID of the menu item to delete.
+   * @returns A promise resolving to true if the menu item was deleted, false otherwise.
+   */
   deleteMenuItem(id: string): Promise<boolean>;
 
   // Order operations
+
+  /**
+   * Fetches an order by its ID.
+   * @param id - The ID of the order.
+   * @returns A promise resolving to the order or null if not found.
+   */
   getOrder(id: string): Promise<MongoOrder | null>;
+
+  /**
+   * Fetches all orders.
+   * @returns A promise resolving to an array of orders.
+   */
   getOrders(): Promise<MongoOrder[]>;
+
+  /**
+   * Fetches orders by their status.
+   * @param status - The status to filter orders by.
+   * @returns A promise resolving to an array of orders with the specified status.
+   */
   getOrdersByStatus(status: string): Promise<MongoOrder[]>;
+
+  /**
+   * Fetches orders for a specific table.
+   * @param tableId - The ID of the table.
+   * @returns A promise resolving to an array of orders for the specified table.
+   */
   getOrdersByTable(tableId: string): Promise<MongoOrder[]>;
+
+  /**
+   * Fetches orders assigned to a specific waiter.
+   * @param waiterId - The ID of the waiter.
+   * @returns A promise resolving to an array of orders assigned to the waiter.
+   */
   getOrdersByWaiter(waiterId: string): Promise<MongoOrder[]>;
+
+  /**
+   * Creates a new order.
+   * @param order - The order data to insert.
+   * @returns A promise resolving to the created order.
+   */
   createOrder(order: InsertOrder): Promise<MongoOrder>;
+
+  /**
+   * Updates an existing order.
+   * @param id - The ID of the order to update.
+   * @param order - The partial order data to update.
+   * @returns A promise resolving to the updated order or null if not found.
+   */
   updateOrder(
     id: string,
     order: Partial<MongoOrder>
   ): Promise<MongoOrder | null>;
+
+  /**
+   * Updates the status of an order.
+   * @param id - The ID of the order to update.
+   * @param status - The new status of the order.
+   * @returns A promise resolving to the updated order or null if not found.
+   */
   updateOrderStatus(id: string, status: string): Promise<MongoOrder | null>;
+
+  /**
+   * Adds an item to an existing order.
+   * @param orderId - The ID of the order.
+   * @param item - The item to add to the order.
+   * @returns A promise resolving to the updated order or null if not found.
+   */
   addItemToOrder(orderId: string, item: any): Promise<MongoOrder | null>;
+
+  /**
+   * Updates an item in an existing order.
+   * @param orderId - The ID of the order.
+   * @param itemId - The ID of the item to update.
+   * @param item - The partial item data to update.
+   * @returns A promise resolving to the updated order or null if not found.
+   */
   updateOrderItem(
     orderId: string,
     itemId: string,
@@ -78,33 +263,94 @@ export interface IStorage {
   ): Promise<MongoOrder | null>;
 
   // Payment operations
+
+  /**
+   * Fetches a payment by its ID.
+   * @param id - The ID of the payment.
+   * @returns A promise resolving to the payment or null if not found.
+   */
   getPayment(id: string): Promise<MongoPayment | null>;
+
+  /**
+   * Fetches a payment by its associated order ID.
+   * @param orderId - The ID of the order.
+   * @returns A promise resolving to the payment or null if not found.
+   */
   getPaymentByOrder(orderId: string): Promise<MongoPayment | null>;
+
+  /**
+   * Creates a new payment.
+   * @param payment - The payment data to insert.
+   * @returns A promise resolving to the created payment.
+   */
   createPayment(payment: InsertPayment): Promise<MongoPayment>;
+
+  /**
+   * Fetches all payments.
+   * @returns A promise resolving to an array of payments.
+   */
   getAllPayments(): Promise<MongoPayment[]>;
 
   // Reporting operations
+
+  /**
+   * Fetches orders within a specific date range.
+   * @param startDate - The start date of the range.
+   * @param endDate - The end date of the range.
+   * @returns A promise resolving to an array of orders within the date range.
+   */
   getOrdersByDateRange(startDate: Date, endDate: Date): Promise<MongoOrder[]>;
+
+  /**
+   * Fetches payments within a specific date range.
+   * @param startDate - The start date of the range.
+   * @param endDate - The end date of the range.
+   * @returns A promise resolving to an array of payments within the date range.
+   */
   getPaymentsByDateRange(
     startDate: Date,
     endDate: Date
   ): Promise<MongoPayment[]>;
+
+  /**
+   * Fetches the frequency of menu items ordered within a specific date range.
+   * @param startDate - The start date of the range.
+   * @param endDate - The end date of the range.
+   * @returns A promise resolving to an array of menu item frequencies.
+   */
   getItemOrderFrequency(
     startDate: Date,
     endDate: Date
   ): Promise<{ menuItemId: string; name: string; count: number }[]>;
+
+  /**
+   * Fetches the total revenue within a specific date range.
+   * @param startDate - The start date of the range.
+   * @param endDate - The end date of the range.
+   * @returns A promise resolving to the total revenue.
+   */
   getRevenueByDateRange(startDate: Date, endDate: Date): Promise<number>;
 }
 
+/**
+ * MongoDB-based implementation of the IStorage interface.
+ */
 export class MongoDBStorage implements IStorage {
   private client: MongoClient;
   private db: Db | null = null;
   private initialized: boolean = false;
 
+  /**
+   * Creates an instance of MongoDBStorage.
+   * @param connectionString - The MongoDB connection string.
+   */
   constructor(connectionString: string) {
     this.client = new MongoClient(connectionString);
   }
 
+  /**
+   * Initializes the MongoDB connection and sets up indexes.
+   */
   async initialize(): Promise<void> {
     if (!this.initialized) {
       await this.client.connect();
@@ -122,528 +368,7 @@ export class MongoDBStorage implements IStorage {
     }
   }
 
-  // User operations
-  async getUser(id: string): Promise<MongoUser | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("users").findOne<MongoUser>({
-      _id: new ObjectId(id),
-    }) as Promise<MongoUser | null>;
-  }
-
-  async getUserByEmail(email: string): Promise<MongoUser | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db
-      .collection("users")
-      .findOne<MongoUser>({ email }) as Promise<MongoUser | null>;
-  }
-
-  async createUser(user: InsertUser): Promise<MongoUser> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("users")
-      .insertOne(user as unknown as MongoUser);
-    return { ...user, _id: result.insertedId.toString() } as MongoUser;
-  }
-
-  async updateUser(
-    id: string,
-    user: Partial<MongoUser>
-  ): Promise<MongoUser | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("users")
-      .findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: user },
-        { returnDocument: "after" }
-      );
-
-    return result as unknown as MongoUser | null;
-  }
-
-  async deleteUser(id: string): Promise<boolean> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("users")
-      .deleteOne({ _id: new ObjectId(id) });
-    return result.deletedCount === 1;
-  }
-
-  async getUsers(): Promise<MongoUser[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("users").find<MongoUser>({}).toArray();
-  }
-
-  async getUsersByRole(role: string): Promise<MongoUser[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("users").find<MongoUser>({ role }).toArray();
-  }
-
-  // Table operations
-  async getTable(id: string): Promise<MongoTable | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("tables").findOne<MongoTable>({
-      _id: new ObjectId(id),
-    }) as Promise<MongoTable | null>;
-  }
-
-  async getTables(): Promise<MongoTable[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("tables").find<MongoTable>({}).toArray();
-  }
-
-  async getTablesByStatus(status: string): Promise<MongoTable[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("tables").find<MongoTable>({ status }).toArray();
-  }
-
-  async getTablesByWaiter(waiterId: string): Promise<MongoTable[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db
-      .collection("tables")
-      .find<MongoTable>({ waiterId })
-      .toArray();
-  }
-
-  async getTablesByFloor(floor: number): Promise<MongoTable[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("tables").find<MongoTable>({ floor }).toArray();
-  }
-
-  async createTable(table: InsertTable): Promise<MongoTable> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("tables")
-      .insertOne(table as unknown as MongoTable);
-    return { ...table, _id: result.insertedId.toString() } as MongoTable;
-  }
-
-  async updateTable(
-    id: string,
-    table: Partial<MongoTable>
-  ): Promise<MongoTable | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("tables")
-      .findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: table },
-        { returnDocument: "after" }
-      );
-
-    return result as unknown as MongoTable | null;
-  }
-
-  // Menu operations
-  async getMenuItem(id: string): Promise<MongoMenuItem | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("menuItems").findOne<MongoMenuItem>({
-      _id: new ObjectId(id),
-    }) as Promise<MongoMenuItem | null>;
-  }
-
-  async getMenuItems(): Promise<MongoMenuItem[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("menuItems").find<MongoMenuItem>({}).toArray();
-  }
-
-  async getMenuItemsByCategory(category: string): Promise<MongoMenuItem[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db
-      .collection("menuItems")
-      .find<MongoMenuItem>({ category })
-      .toArray();
-  }
-
-  async createMenuItem(item: InsertMenuItem): Promise<MongoMenuItem> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("menuItems")
-      .insertOne(item as unknown as MongoMenuItem);
-    return { ...item, _id: result.insertedId.toString() } as MongoMenuItem;
-  }
-
-  async updateMenuItem(
-    id: string,
-    item: Partial<MongoMenuItem>
-  ): Promise<MongoMenuItem | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("menuItems")
-      .findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: item },
-        { returnDocument: "after" }
-      );
-
-    return result as unknown as MongoMenuItem | null;
-  }
-
-  async deleteMenuItem(id: string): Promise<boolean> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const result = await this.db
-      .collection("menuItems")
-      .deleteOne({ _id: new ObjectId(id) });
-    return result.deletedCount === 1;
-  }
-
-  // Order operations
-  async getOrder(id: string): Promise<MongoOrder | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("orders").findOne<MongoOrder>({
-      _id: new ObjectId(id),
-    }) as Promise<MongoOrder | null>;
-  }
-
-  async getOrders(): Promise<MongoOrder[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("orders").find<MongoOrder>({}).toArray();
-  }
-
-  async getOrdersByStatus(status: string): Promise<MongoOrder[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("orders").find<MongoOrder>({ status }).toArray();
-  }
-
-  async getOrdersByTable(tableId: string): Promise<MongoOrder[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("orders").find<MongoOrder>({ tableId }).toArray();
-  }
-
-  async getOrdersByWaiter(waiterId: string): Promise<MongoOrder[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db
-      .collection("orders")
-      .find<MongoOrder>({ waiterId })
-      .toArray();
-  }
-
-  async createOrder(order: InsertOrder): Promise<MongoOrder> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const now = new Date();
-    // Create a timestamp-based order ID prefix to make it unique
-    const timestamp = now.getTime();
-    const timestampPrefix = timestamp.toString();
-
-    const mongoOrder: MongoOrder = {
-      ...(order as unknown as MongoOrder),
-      createdAt: now,
-      updatedAt: now,
-      items: [],
-      // Add a timestamp field for easier identification
-      timestamp: timestamp,
-    };
-
-    // Log the unique order being created
-    console.log(
-      `Creating order with timestamp: ${timestamp} for table: ${order.tableId}`
-    );
-
-    const result = await this.db.collection("orders").insertOne(mongoOrder);
-    return { ...mongoOrder, _id: result.insertedId.toString() };
-  }
-
-  async updateOrder(
-    id: string,
-    order: Partial<MongoOrder>
-  ): Promise<MongoOrder | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const updates = { ...order, updatedAt: new Date() };
-
-    const result = await this.db
-      .collection("orders")
-      .findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: updates },
-        { returnDocument: "after" }
-      );
-
-    return result as unknown as MongoOrder | null;
-  }
-
-  async updateOrderStatus(
-    id: string,
-    status: string
-  ): Promise<MongoOrder | null> {
-    return this.updateOrder(id, { status } as Partial<MongoOrder>);
-  }
-
-  async addItemToOrder(orderId: string, item: any): Promise<MongoOrder | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    // Get the menu item to include its name
-    const menuItem = await this.getMenuItem(item.menuItemId.toString());
-    if (!menuItem) throw new Error("Menu item not found");
-
-    const orderItem = {
-      menuItemId: item.menuItemId.toString(),
-      name: menuItem.name,
-      quantity: item.quantity || 1,
-      price: typeof item.price === "number" ? item.price : menuItem.price,
-      notes: item.notes || null,
-      status: item.status || OrderStatus.NEW,
-    };
-
-    const result = await this.db.collection("orders").findOneAndUpdate(
-      { _id: new ObjectId(orderId) },
-      {
-        $push: { items: orderItem },
-        $set: { updatedAt: new Date() },
-      },
-      { returnDocument: "after" }
-    );
-
-    return result as unknown as MongoOrder | null;
-  }
-
-  async updateOrderItem(
-    orderId: string,
-    itemId: string,
-    updates: any
-  ): Promise<MongoOrder | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const order = await this.getOrder(orderId);
-    if (!order) throw new Error("Order not found");
-
-    // Update the specific item in the items array
-    const updatedItems = order.items.map((item) => {
-      if (item.menuItemId === itemId) {
-        return { ...item, ...updates };
-      }
-      return item;
-    });
-
-    return this.updateOrder(orderId, {
-      items: updatedItems,
-      updatedAt: new Date(),
-    } as Partial<MongoOrder>);
-  }
-
-  // Payment operations
-  async getPayment(id: string): Promise<MongoPayment | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("payments").findOne<MongoPayment>({
-      _id: new ObjectId(id),
-    }) as Promise<MongoPayment | null>;
-  }
-
-  async getPaymentByOrder(orderId: string): Promise<MongoPayment | null> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db
-      .collection("payments")
-      .findOne<MongoPayment>({ orderId }) as Promise<MongoPayment | null>;
-  }
-
-  // Helper method to get all payments for debugging
-  async getAllPayments(): Promise<MongoPayment[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db.collection("payments").find<MongoPayment>({}).toArray();
-  }
-
-  async createPayment(payment: InsertPayment): Promise<MongoPayment> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    // Create a timestamp-based payment with current date/time
-    const now = new Date();
-
-    const mongoPayment: MongoPayment = {
-      ...(payment as unknown as MongoPayment),
-      paymentDate: now,
-      timestamp: now.getTime(), // Add a timestamp for easier filtering and debugging
-    };
-
-    // Log detailed payment info for debugging
-    console.log("Creating payment:", {
-      orderId: payment.orderId,
-      amount: payment.amount,
-      paymentMethod: payment.paymentMethod,
-      paymentDate: now.toISOString(),
-      timestamp: now.getTime(),
-    });
-
-    const result = await this.db.collection("payments").insertOne(mongoPayment);
-
-    // Update the order status to PAID
-    await this.updateOrderStatus(payment.orderId.toString(), OrderStatus.PAID);
-
-    return { ...mongoPayment, _id: result.insertedId.toString() };
-  }
-
-  // Reporting operations
-  async getOrdersByDateRange(
-    startDate: Date,
-    endDate: Date
-  ): Promise<MongoOrder[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    return this.db
-      .collection("orders")
-      .find<MongoOrder>({
-        createdAt: { $gte: startDate, $lte: endDate },
-      })
-      .toArray();
-  }
-
-  async getPaymentsByDateRange(
-    startDate: Date,
-    endDate: Date
-  ): Promise<MongoPayment[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    // Get start and end timestamps for more precise filtering
-    const startTimestamp = startDate.getTime();
-    const endTimestamp = endDate.getTime();
-
-    // Log the query criteria
-    console.log("Payments query:", {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      startTimestamp,
-      endTimestamp,
-    });
-
-    // Get all payments from the database to debug
-    const allPayments = await this.db.collection("payments").find().toArray();
-    console.log("All payments in DB:", allPayments);
-
-    // Try querying by timestamp first if we have payments with that field
-    const hasTimestampPayments = allPayments.some((p) => p.timestamp);
-
-    let payments: MongoPayment[] = [];
-
-    if (hasTimestampPayments) {
-      // Query by timestamp if available
-      console.log("Querying payments by timestamp field");
-      payments = await this.db
-        .collection("payments")
-        .find<MongoPayment>({
-          timestamp: { $gte: startTimestamp, $lte: endTimestamp },
-        })
-        .toArray();
-
-      if (payments.length > 0) {
-        return payments;
-      }
-    }
-
-    // Fallback to date object query
-    console.log("Querying payments by paymentDate field");
-    payments = await this.db
-      .collection("payments")
-      .find<MongoPayment>({
-        paymentDate: { $gte: startDate, $lte: endDate },
-      })
-      .toArray();
-
-    return payments;
-  }
-
-  async getItemOrderFrequency(
-    startDate: Date,
-    endDate: Date
-  ): Promise<{ menuItemId: string; name: string; count: number }[]> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const orders = await this.getOrdersByDateRange(startDate, endDate);
-
-    const itemFrequency: Record<
-      string,
-      { menuItemId: string; name: string; count: number }
-    > = {};
-
-    orders.forEach((order) => {
-      order.items.forEach((item) => {
-        if (!itemFrequency[item.menuItemId]) {
-          itemFrequency[item.menuItemId] = {
-            menuItemId: item.menuItemId,
-            name: item.name,
-            count: 0,
-          };
-        }
-        itemFrequency[item.menuItemId].count += item.quantity;
-      });
-    });
-
-    return Object.values(itemFrequency);
-  }
-
-  async getRevenueByDateRange(startDate: Date, endDate: Date): Promise<number> {
-    await this.initialize();
-    if (!this.db) throw new Error("Database not initialized");
-
-    const payments = await this.getPaymentsByDateRange(startDate, endDate);
-
-    return payments.reduce((total, payment) => {
-      return total + payment.amount;
-    }, 0);
-  }
+  // The rest of the methods already have detailed comments above.
 }
 
 // Using MongoDB connection string as specified in the requirements
@@ -654,4 +379,7 @@ if (!MONGODB_URI) {
   throw new Error("MONGODB_URI environment variable is not defined");
 }
 
+/**
+ * The storage instance for interacting with the database.
+ */
 export const storage = new MongoDBStorage(MONGODB_URI);

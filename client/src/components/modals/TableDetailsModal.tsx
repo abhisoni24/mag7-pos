@@ -1,15 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateTable } from '../../redux/tableSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { Table as TableType } from '../../redux/tableSlice';
-import { StaffMember } from '../../redux/staffSlice';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { TableStatus, UserRole } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateTable } from "../../redux/tableSlice";
+import { AppDispatch, RootState } from "../../redux/store";
+import { Table as TableType } from "../../redux/tableSlice";
+import { StaffMember } from "../../redux/staffSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { TableStatus, UserRole } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -18,6 +24,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+/**
+ * @interface TableDetailsModalProps
+ * @description Interface for the props of the TableDetailsModal component.
+ * @param {boolean} isOpen - A boolean indicating whether the modal is open.
+ * @param {function} onClose - A function to close the modal.
+ * @param {TableType} table - The table to display details for.
+ * @param {StaffMember[]} waiters - An array of staff members to assign as waiters.
+ * @param {function} onCreateOrder - A function to handle creating an order for the table.
+ * @param {boolean} canChangeStatus - A boolean indicating whether the user can change the table status.
+ */
 interface TableDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,54 +43,77 @@ interface TableDetailsModalProps {
   canChangeStatus: boolean;
 }
 
+/**
+ * @component TableDetailsModal
+ * @description A modal component that displays and allows editing of table details.
+ *              It allows changing the table status, assigning a waiter, and setting reservation details.
+ * @param {TableDetailsModalProps} props - The props for the TableDetailsModal component.
+ * @returns {JSX.Element} - The modal element with table details and action buttons.
+ */
 const TableDetailsModal = ({
   isOpen,
   onClose,
   table,
   waiters,
   onCreateOrder,
-  canChangeStatus
+  canChangeStatus,
 }: TableDetailsModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
   const { user } = useSelector((state: RootState) => state.auth);
-  
+
   // Form state
   const [status, setStatus] = useState<string>(table.status);
   const [guestCount, setGuestCount] = useState<number>(table.guestCount || 1);
-  const [waiterId, setWaiterId] = useState<string>(table.waiterId || '');
-  const [reservationTime, setReservationTime] = useState<string>('');
-  const [reservationName, setReservationName] = useState<string>(table.reservationName || '');
-  const [reservationPhone, setReservationPhone] = useState<string>(table.reservationPhone || '');
-  
-  // Reset form when table changes
+  const [waiterId, setWaiterId] = useState<string>(table.waiterId || "");
+  const [reservationTime, setReservationTime] = useState<string>("");
+  const [reservationName, setReservationName] = useState<string>(
+    table.reservationName || ""
+  );
+  const [reservationPhone, setReservationPhone] = useState<string>(
+    table.reservationPhone || ""
+  );
+
+  /**
+   * @useEffect
+   * @description Resets form when table changes.
+   */
   useEffect(() => {
     setStatus(table.status);
     setGuestCount(table.guestCount || 1);
-    setWaiterId(table.waiterId || '');
-    setReservationName(table.reservationName || '');
-    setReservationPhone(table.reservationPhone || '');
-    
+    setWaiterId(table.waiterId || "");
+    setReservationName(table.reservationName || "");
+    setReservationPhone(table.reservationPhone || "");
+
     // Format reservation time for input
     if (table.reservationTime) {
       const time = new Date(table.reservationTime);
-      const hours = time.getHours().toString().padStart(2, '0');
-      const minutes = time.getMinutes().toString().padStart(2, '0');
+      const hours = time.getHours().toString().padStart(2, "0");
+      const minutes = time.getMinutes().toString().padStart(2, "0");
       setReservationTime(`${hours}:${minutes}`);
     } else {
-      setReservationTime('');
+      setReservationTime("");
     }
   }, [table]);
-  
+
+  /**
+   * @function handleStatusChange
+   * @description Handles status change.
+   * @param {string} value - The new status value.
+   */
   const handleStatusChange = (value: string) => {
     setStatus(value);
   };
-  
+
+  /**
+   * @function handleSave
+   * @description Handles save.
+   */
   const handleSave = async () => {
     try {
       // Prepare updates
       const updates: any = { status };
-      
+
       // Add additional fields based on status
       if (status === TableStatus.OCCUPIED) {
         if (!waiterId) {
@@ -85,19 +124,19 @@ const TableDetailsModal = ({
           });
           return;
         }
-        
+
         updates.waiterId = waiterId;
         updates.guestCount = guestCount;
-        updates.reservationName = '';
-        updates.reservationPhone = '';
+        updates.reservationName = "";
+        updates.reservationPhone = "";
         updates.reservationTime = null;
       } else if (status === TableStatus.RESERVED) {
         updates.reservationName = reservationName;
         updates.reservationPhone = reservationPhone;
-        
+
         // Parse reservation time
         if (reservationTime) {
-          const [hours, minutes] = reservationTime.split(':').map(Number);
+          const [hours, minutes] = reservationTime.split(":").map(Number);
           const date = new Date();
           date.setHours(hours, minutes, 0, 0);
           updates.reservationTime = date.toISOString();
@@ -107,24 +146,25 @@ const TableDetailsModal = ({
       } else if (status === TableStatus.AVAILABLE) {
         updates.waiterId = null;
         updates.guestCount = null;
-        updates.reservationName = '';
-        updates.reservationPhone = '';
+        updates.reservationName = "";
+        updates.reservationPhone = "";
         updates.reservationTime = null;
       }
-      
+
       await dispatch(updateTable({ id: table._id, data: updates })).unwrap();
-      
+
       toast({
         title: "Table updated",
         description: `Table ${table.number} has been updated successfully.`,
       });
-      
+
       onClose();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Update failed",
-        description: error as string || "An error occurred while updating the table.",
+        description:
+          (error as string) || "An error occurred while updating the table.",
       });
     }
   };
@@ -135,19 +175,23 @@ const TableDetailsModal = ({
         <DialogHeader>
           <DialogTitle>Table {table.number}</DialogTitle>
         </DialogHeader>
-        
+
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
             <Label>Status</Label>
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
-                variant={status === TableStatus.AVAILABLE ? "default" : "outline"}
-                onClick={() => canChangeStatus && handleStatusChange(TableStatus.AVAILABLE)}
+                variant={
+                  status === TableStatus.AVAILABLE ? "default" : "outline"
+                }
+                onClick={() =>
+                  canChangeStatus && handleStatusChange(TableStatus.AVAILABLE)
+                }
                 disabled={!canChangeStatus}
                 className={
-                  status === TableStatus.AVAILABLE 
-                    ? "bg-green-500 hover:bg-green-600" 
+                  status === TableStatus.AVAILABLE
+                    ? "bg-green-500 hover:bg-green-600"
                     : ""
                 }
               >
@@ -155,12 +199,16 @@ const TableDetailsModal = ({
               </Button>
               <Button
                 type="button"
-                variant={status === TableStatus.OCCUPIED ? "default" : "outline"}
-                onClick={() => canChangeStatus && handleStatusChange(TableStatus.OCCUPIED)}
+                variant={
+                  status === TableStatus.OCCUPIED ? "default" : "outline"
+                }
+                onClick={() =>
+                  canChangeStatus && handleStatusChange(TableStatus.OCCUPIED)
+                }
                 disabled={!canChangeStatus}
                 className={
-                  status === TableStatus.OCCUPIED 
-                    ? "bg-red-500 hover:bg-red-600" 
+                  status === TableStatus.OCCUPIED
+                    ? "bg-red-500 hover:bg-red-600"
                     : ""
                 }
               >
@@ -168,12 +216,16 @@ const TableDetailsModal = ({
               </Button>
               <Button
                 type="button"
-                variant={status === TableStatus.RESERVED ? "default" : "outline"}
-                onClick={() => canChangeStatus && handleStatusChange(TableStatus.RESERVED)}
+                variant={
+                  status === TableStatus.RESERVED ? "default" : "outline"
+                }
+                onClick={() =>
+                  canChangeStatus && handleStatusChange(TableStatus.RESERVED)
+                }
                 disabled={!canChangeStatus}
                 className={
-                  status === TableStatus.RESERVED 
-                    ? "bg-yellow-500 hover:bg-yellow-600" 
+                  status === TableStatus.RESERVED
+                    ? "bg-yellow-500 hover:bg-yellow-600"
                     : ""
                 }
               >
@@ -181,7 +233,7 @@ const TableDetailsModal = ({
               </Button>
             </div>
           </div>
-          
+
           {status === TableStatus.OCCUPIED && (
             <div className="space-y-4">
               <div>
@@ -190,18 +242,17 @@ const TableDetailsModal = ({
                   id="num-guests"
                   type="number"
                   value={guestCount}
-                  onChange={(e) => setGuestCount(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) =>
+                    setGuestCount(Math.max(1, parseInt(e.target.value) || 1))
+                  }
                   min="1"
                   max={table.capacity}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="waiter-assign">Assign Waiter</Label>
-                <Select
-                  value={waiterId}
-                  onValueChange={setWaiterId}
-                >
+                <Select value={waiterId} onValueChange={setWaiterId}>
                   <SelectTrigger id="waiter-assign">
                     <SelectValue placeholder="Select a waiter" />
                   </SelectTrigger>
@@ -216,7 +267,7 @@ const TableDetailsModal = ({
               </div>
             </div>
           )}
-          
+
           {status === TableStatus.RESERVED && (
             <div className="space-y-4">
               <div>
@@ -228,7 +279,7 @@ const TableDetailsModal = ({
                   onChange={(e) => setReservationTime(e.target.value)}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="reservation-name">Name</Label>
                 <Input
@@ -238,7 +289,7 @@ const TableDetailsModal = ({
                   placeholder="Customer name"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="reservation-phone">Phone</Label>
                 <Input
@@ -250,11 +301,11 @@ const TableDetailsModal = ({
               </div>
             </div>
           )}
-          
+
           <div className="flex gap-2 pt-2">
             {/* Always show Create Order for occupied tables */}
             {status === TableStatus.OCCUPIED && (
-              <Button 
+              <Button
                 className="flex-1 bg-primary text-white hover:bg-primary-dark"
                 onClick={onCreateOrder}
               >
@@ -263,12 +314,12 @@ const TableDetailsModal = ({
             )}
           </div>
         </div>
-        
+
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSave}
             // All roles including waiters can save changes to table status
           >

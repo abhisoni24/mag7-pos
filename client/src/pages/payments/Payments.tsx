@@ -1,21 +1,28 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchOrders, Order, createPayment } from '../../redux/orderSlice';
-import { fetchTables } from '../../redux/tableSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchOrders, Order, createPayment } from "../../redux/orderSlice";
+import { fetchTables } from "../../redux/tableSlice";
+import { AppDispatch, RootState } from "../../redux/store";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -23,97 +30,152 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { OrderStatus } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
-import { CreditCard, Receipt } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OrderStatus } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { CreditCard, Receipt } from "lucide-react";
 
+/**
+ * @component Payments
+ * @description A page component for processing payments for orders.
+ * It displays a list of pending and paid orders, allows filtering by status, and provides a modal for processing payments.
+ */
 const Payments = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { orders, loading } = useSelector((state: RootState) => state.orders);
   const { tables } = useSelector((state: RootState) => state.tables);
   const { user } = useSelector((state: RootState) => state.auth);
-  
+
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [tipAmount, setTipAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [activeTab, setActiveTab] = useState('pending');
-  
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [tipAmount, setTipAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [activeTab, setActiveTab] = useState("pending");
+
   const { toast } = useToast();
-  
+
+  /**
+   * @useEffect
+   * @description Fetches orders and tables data from the Redux store on component mount.
+   */
   useEffect(() => {
     dispatch(fetchOrders());
     dispatch(fetchTables());
   }, [dispatch]);
-  
-  // Filter orders
-  const pendingPaymentOrders = orders.filter(order => 
-    (order.status === OrderStatus.DONE || order.status === OrderStatus.DELIVERED) &&
-    // Filter by current user if they're a waiter
-    (user?.role !== 'waiter' || order.waiterId === user.id)
+
+  /**
+   * @constant pendingPaymentOrders
+   * @description Filters the orders to only include those that are pending payment (status is 'done' or 'delivered').
+   */
+  const pendingPaymentOrders = orders.filter(
+    (order) =>
+      (order.status === OrderStatus.DONE ||
+        order.status === OrderStatus.DELIVERED) &&
+      // Filter by current user if they're a waiter
+      (user?.role !== "waiter" || order.waiterId === user.id)
   );
-  
-  const paidOrders = orders.filter(order => 
-    order.status === OrderStatus.PAID &&
-    // Filter by current user if they're a waiter
-    (user?.role !== 'waiter' || order.waiterId === user.id)
+
+  /**
+   * @constant paidOrders
+   * @description Filters the orders to only include those that have been paid (status is 'paid').
+   */
+  const paidOrders = orders.filter(
+    (order) =>
+      order.status === OrderStatus.PAID &&
+      // Filter by current user if they're a waiter
+      (user?.role !== "waiter" || order.waiterId === user.id)
   );
-  
-  // Sort orders by date (newest first)
+
+  /**
+   * @constant sortedPendingOrders
+   * @description Sorts the pending payment orders by update date (newest first).
+   */
   const sortedPendingOrders = [...pendingPaymentOrders].sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
-  
+
+  /**
+   * @constant sortedPaidOrders
+   * @description Sorts the paid orders by update date (newest first).
+   */
   const sortedPaidOrders = [...paidOrders].sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
-  
-  // Get table info
+
+  /**
+   * @function getTableInfo
+   * @description Retrieves table information based on the table ID.
+   * @param {string} tableId - The ID of the table.
+   * @returns {string} - A string containing the table number, or 'Unknown Table' if not found.
+   */
   const getTableInfo = (tableId: string) => {
-    const table = tables.find(t => t._id === tableId);
-    return table ? `Table ${table.number}` : 'Unknown Table';
+    const table = tables.find((t) => t._id === tableId);
+    return table ? `Table ${table.number}` : "Unknown Table";
   };
-  
-  // Calculate order total
+
+  /**
+   * @function calculateOrderTotal
+   * @description Calculates the total amount for an order based on the price and quantity of each item.
+   * @param {Order} order - The order to calculate the total for.
+   * @returns {number} - The total amount for the order.
+   */
   const calculateOrderTotal = (order: Order) => {
     return order.items.reduce((total, item) => {
-      return total + (item.price * item.quantity);
+      return total + item.price * item.quantity;
     }, 0);
   };
-  
+
+  /**
+   * @function handleOpenPaymentModal
+   * @description Opens the payment modal for a specific order.
+   * @param {Order} order - The order to process the payment for.
+   */
   const handleOpenPaymentModal = (order: Order) => {
     setSelectedOrder(order);
     const total = calculateOrderTotal(order);
     setPaymentAmount(total.toFixed(2));
-    setTipAmount('0.00');
+    setTipAmount("0.00");
     setIsPaymentModalOpen(true);
   };
-  
+
+  /**
+   * @function handleClosePaymentModal
+   * @description Closes the payment modal and resets the state.
+   */
   const handleClosePaymentModal = () => {
     setIsPaymentModalOpen(false);
     setSelectedOrder(null);
-    setPaymentAmount('');
-    setTipAmount('');
+    setPaymentAmount("");
+    setTipAmount("");
   };
-  
+
+  /**
+   * @function handleProcessPayment
+   * @description Processes the payment for the selected order.
+   * It dispatches the createPayment action and displays a toast notification.
+   */
   const handleProcessPayment = async () => {
     if (!selectedOrder || !paymentAmount) return;
-    
+
     try {
-      await dispatch(createPayment({
-        orderId: selectedOrder._id as string,
-        amount: parseFloat(paymentAmount),
-        tip: parseFloat(tipAmount || '0'),
-        paymentMethod
-      })).unwrap();
-      
+      await dispatch(
+        createPayment({
+          orderId: selectedOrder._id as string,
+          amount: parseFloat(paymentAmount),
+          tip: parseFloat(tipAmount || "0"),
+          paymentMethod,
+        })
+      ).unwrap();
+
       toast({
         title: "Payment processed",
-        description: `Payment for order #${selectedOrder._id?.substring(0, 4)} has been processed successfully.`,
+        description: `Payment for order #${selectedOrder._id?.substring(
+          0,
+          4
+        )} has been processed successfully.`,
       });
-      
+
       handleClosePaymentModal();
       dispatch(fetchOrders());
       dispatch(fetchTables());
@@ -121,11 +183,17 @@ const Payments = () => {
       toast({
         variant: "destructive",
         title: "Payment failed",
-        description: error as string || "Failed to process payment",
+        description: (error as string) || "Failed to process payment",
       });
     }
   };
-  
+
+  /**
+   * @function renderOrdersTable
+   * @description Renders a table of orders.
+   * @param {Order[]} ordersToDisplay - The array of orders to display in the table.
+   * @returns {JSX.Element} - The table element.
+   */
   const renderOrdersTable = (ordersToDisplay: Order[]) => {
     return (
       <Table>
@@ -141,20 +209,24 @@ const Payments = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {ordersToDisplay.map(order => {
+          {ordersToDisplay.map((order) => {
             const total = calculateOrderTotal(order);
-            
+
             return (
               <TableRow key={order._id}>
-                <TableCell className="font-medium">#{order._id?.substring(0, 4)}</TableCell>
+                <TableCell className="font-medium">
+                  #{order._id?.substring(0, 4)}
+                </TableCell>
                 <TableCell>{getTableInfo(order.tableId)}</TableCell>
-                <TableCell>{new Date(order.updatedAt).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(order.updatedAt).toLocaleDateString()}
+                </TableCell>
                 <TableCell>{order.items.length} items</TableCell>
                 <TableCell>${total.toFixed(2)}</TableCell>
                 <TableCell className="capitalize">{order.status}</TableCell>
                 <TableCell className="text-right">
                   {order.status !== OrderStatus.PAID ? (
-                    <Button 
+                    <Button
                       size="sm"
                       onClick={() => handleOpenPaymentModal(order)}
                     >
@@ -162,11 +234,7 @@ const Payments = () => {
                       Process Payment
                     </Button>
                   ) : (
-                    <Button 
-                      size="sm"
-                      variant="outline"
-                      disabled
-                    >
+                    <Button size="sm" variant="outline" disabled>
                       <Receipt className="mr-2 h-4 w-4" />
                       Paid
                     </Button>
@@ -175,7 +243,7 @@ const Payments = () => {
               </TableRow>
             );
           })}
-          
+
           {ordersToDisplay.length === 0 && (
             <TableRow>
               <TableCell colSpan={7} className="text-center py-8 text-gray-500">
@@ -190,12 +258,16 @@ const Payments = () => {
 
   return (
     <div className="p-4 bg-gray-100">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="pending">Pending Payments</TabsTrigger>
           <TabsTrigger value="paid">Paid Orders</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="pending">
           <Card>
             <CardContent className="p-0">
@@ -211,7 +283,7 @@ const Payments = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="paid">
           <Card>
             <CardContent className="p-0">
@@ -228,7 +300,7 @@ const Payments = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      
+
       {/* Payment Modal */}
       <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
         <DialogContent>
@@ -236,11 +308,14 @@ const Payments = () => {
             <DialogTitle>Process Payment</DialogTitle>
             <DialogDescription>
               {selectedOrder && (
-                <span>Order #{selectedOrder._id?.substring(0, 4)} - {getTableInfo(selectedOrder.tableId)}</span>
+                <span>
+                  Order #{selectedOrder._id?.substring(0, 4)} -{" "}
+                  {getTableInfo(selectedOrder.tableId)}
+                </span>
               )}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedOrder && (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -259,18 +334,26 @@ const Payments = () => {
                       <TableRow key={index}>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.quantity}</TableCell>
-                        <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">${(item.price * item.quantity).toFixed(2)}</TableCell>
+                        <TableCell className="text-right">
+                          ${item.price.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ${(item.price * item.quantity).toFixed(2)}
+                        </TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={3} className="text-right font-medium">Subtotal</TableCell>
-                      <TableCell className="text-right font-medium">${calculateOrderTotal(selectedOrder).toFixed(2)}</TableCell>
+                      <TableCell colSpan={3} className="text-right font-medium">
+                        Subtotal
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        ${calculateOrderTotal(selectedOrder).toFixed(2)}
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="payment-amount">Payment Amount</Label>
@@ -283,7 +366,7 @@ const Payments = () => {
                     min="0"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="tip-amount">Tip Amount</Label>
                   <Input
@@ -295,10 +378,13 @@ const Payments = () => {
                     min="0"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="payment-method">Payment Method</Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <Select
+                    value={paymentMethod}
+                    onValueChange={setPaymentMethod}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select payment method" />
                     </SelectTrigger>
@@ -306,21 +392,31 @@ const Payments = () => {
                       <SelectItem value="cash">Cash</SelectItem>
                       <SelectItem value="credit_card">Credit Card</SelectItem>
                       <SelectItem value="debit_card">Debit Card</SelectItem>
-                      <SelectItem value="mobile_payment">Mobile Payment</SelectItem>
+                      <SelectItem value="mobile_payment">
+                        Mobile Payment
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="py-2 flex justify-between font-medium">
                   <span>Total Payment:</span>
-                  <span>${(parseFloat(paymentAmount || '0') + parseFloat(tipAmount || '0')).toFixed(2)}</span>
+                  <span>
+                    $
+                    {(
+                      parseFloat(paymentAmount || "0") +
+                      parseFloat(tipAmount || "0")
+                    ).toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
-            <Button variant="outline" onClick={handleClosePaymentModal}>Cancel</Button>
+            <Button variant="outline" onClick={handleClosePaymentModal}>
+              Cancel
+            </Button>
             <Button onClick={handleProcessPayment}>Process Payment</Button>
           </DialogFooter>
         </DialogContent>

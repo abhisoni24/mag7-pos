@@ -1,8 +1,20 @@
-import { pgTable, text, serial, integer, boolean, jsonb, timestamp, numeric, real } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  jsonb,
+  timestamp,
+  numeric,
+  real,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Define user roles
+/**
+ * Enum-like object defining user roles in the system.
+ */
 export const UserRole = {
   HOST: "host",
   WAITER: "waiter",
@@ -12,14 +24,18 @@ export const UserRole = {
   ADMIN: "admin",
 } as const;
 
-// Define table statuses
+/**
+ * Enum-like object defining table statuses.
+ */
 export const TableStatus = {
   AVAILABLE: "available",
   OCCUPIED: "occupied",
   RESERVED: "reserved",
 } as const;
 
-// Define order statuses
+/**
+ * Enum-like object defining order statuses.
+ */
 export const OrderStatus = {
   NEW: "new",
   IN_PROGRESS: "in_progress",
@@ -29,7 +45,9 @@ export const OrderStatus = {
   CANCELLED: "cancelled",
 } as const;
 
-// Define item categories
+/**
+ * Enum-like object defining menu item categories.
+ */
 export const MenuItemCategory = {
   APPETIZER: "appetizer",
   MAIN_COURSE: "main_course",
@@ -38,7 +56,9 @@ export const MenuItemCategory = {
   DRINK: "drink",
 } as const;
 
-// User model
+/**
+ * Database table schema for users.
+ */
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -48,7 +68,9 @@ export const users = pgTable("users", {
   active: boolean("active").default(true),
 });
 
-// Table model
+/**
+ * Database table schema for tables.
+ */
 export const tables = pgTable("tables", {
   id: serial("id").primaryKey(),
   number: integer("number").notNull().unique(),
@@ -62,7 +84,9 @@ export const tables = pgTable("tables", {
   guestCount: integer("guest_count"),
 });
 
-// Menu items
+/**
+ * Database table schema for menu items.
+ */
 export const menuItems = pgTable("menu_items", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -73,64 +97,155 @@ export const menuItems = pgTable("menu_items", {
   isSpecial: boolean("is_special").default(false),
 });
 
-// Orders
+/**
+ * Database table schema for orders.
+ */
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
-  tableId: integer("table_id").notNull().references(() => tables.id),
+  tableId: integer("table_id")
+    .notNull()
+    .references(() => tables.id),
   waiterId: integer("waiter_id").references(() => users.id),
   status: text("status").notNull().default(OrderStatus.NEW),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Order items
+/**
+ * Database table schema for order items.
+ */
 export const orderItems = pgTable("order_items", {
   id: serial("id").primaryKey(),
-  orderId: integer("order_id").notNull().references(() => orders.id),
-  menuItemId: integer("menu_item_id").notNull().references(() => menuItems.id),
+  orderId: integer("order_id")
+    .notNull()
+    .references(() => orders.id),
+  menuItemId: integer("menu_item_id")
+    .notNull()
+    .references(() => menuItems.id),
   quantity: integer("quantity").notNull().default(1),
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   notes: text("notes"),
   status: text("status").notNull().default(OrderStatus.NEW),
 });
 
-// Payments
+/**
+ * Database table schema for payments.
+ */
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
-  orderId: integer("order_id").notNull().references(() => orders.id),
+  orderId: integer("order_id")
+    .notNull()
+    .references(() => orders.id),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   tip: numeric("tip", { precision: 10, scale: 2 }).default("0"),
   paymentMethod: text("payment_method").notNull(),
   paymentDate: timestamp("payment_date").defaultNow(),
 });
 
-// Insert schemas
+/**
+ * Zod schema for inserting a new user.
+ */
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
-export const insertTableSchema = createInsertSchema(tables).omit({ id: true });
-export const insertMenuItemSchema = createInsertSchema(menuItems).omit({ id: true });
-export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
-export const insertPaymentSchema = createInsertSchema(payments).omit({ id: true, paymentDate: true });
 
-// Types for insert
+/**
+ * Zod schema for inserting a new table.
+ */
+export const insertTableSchema = createInsertSchema(tables).omit({ id: true });
+
+/**
+ * Zod schema for inserting a new menu item.
+ */
+export const insertMenuItemSchema = createInsertSchema(menuItems).omit({
+  id: true,
+});
+
+/**
+ * Zod schema for inserting a new order.
+ */
+export const insertOrderSchema = createInsertSchema(orders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+/**
+ * Zod schema for inserting a new order item.
+ */
+export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
+  id: true,
+});
+
+/**
+ * Zod schema for inserting a new payment.
+ */
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  paymentDate: true,
+});
+
+/**
+ * Type definition for inserting a new user.
+ */
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+/**
+ * Type definition for inserting a new table.
+ */
 export type InsertTable = z.infer<typeof insertTableSchema>;
+
+/**
+ * Type definition for inserting a new menu item.
+ */
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
+
+/**
+ * Type definition for inserting a new order.
+ */
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
+
+/**
+ * Type definition for inserting a new order item.
+ */
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+
+/**
+ * Type definition for inserting a new payment.
+ */
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 
-// Types for select
+/**
+ * Type definition for selecting a user.
+ */
 export type User = typeof users.$inferSelect;
+
+/**
+ * Type definition for selecting a table.
+ */
 export type Table = typeof tables.$inferSelect;
+
+/**
+ * Type definition for selecting a menu item.
+ */
 export type MenuItem = typeof menuItems.$inferSelect;
+
+/**
+ * Type definition for selecting an order.
+ */
 export type Order = typeof orders.$inferSelect;
+
+/**
+ * Type definition for selecting an order item.
+ */
 export type OrderItem = typeof orderItems.$inferSelect;
+
+/**
+ * Type definition for selecting a payment.
+ */
 export type Payment = typeof payments.$inferSelect;
 
-// MongoDB Models (since we're using MongoDB as specified)
-// These will be used for our actual storage implementation
-
+/**
+ * MongoDB model for a user.
+ */
 export interface MongoUser {
   _id?: string;
   name: string;
@@ -140,6 +255,9 @@ export interface MongoUser {
   active: boolean;
 }
 
+/**
+ * MongoDB model for a table.
+ */
 export interface MongoTable {
   _id?: string;
   number: number;
@@ -153,6 +271,9 @@ export interface MongoTable {
   guestCount?: number;
 }
 
+/**
+ * MongoDB model for a menu item.
+ */
 export interface MongoMenuItem {
   _id?: string;
   name: string;
@@ -163,6 +284,9 @@ export interface MongoMenuItem {
   isSpecial: boolean;
 }
 
+/**
+ * MongoDB model for an order.
+ */
 export interface MongoOrder {
   _id?: string;
   tableId: string;
@@ -174,6 +298,9 @@ export interface MongoOrder {
   timestamp?: number; // Added for unique order identification
 }
 
+/**
+ * MongoDB model for an order item.
+ */
 export interface MongoOrderItem {
   menuItemId: string;
   name: string;
@@ -183,6 +310,9 @@ export interface MongoOrderItem {
   status: string;
 }
 
+/**
+ * MongoDB model for a payment.
+ */
 export interface MongoPayment {
   _id?: string;
   orderId: string;
@@ -193,11 +323,16 @@ export interface MongoPayment {
   timestamp?: number; // Added for better filtering in report queries
 }
 
-// Login schema for validation
+/**
+ * Zod schema for validating login data.
+ */
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   role: z.string().optional(),
 });
 
+/**
+ * Type definition for login data.
+ */
 export type LoginData = z.infer<typeof loginSchema>;

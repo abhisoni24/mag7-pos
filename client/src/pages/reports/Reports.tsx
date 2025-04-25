@@ -1,17 +1,23 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchItemFrequency, 
-  fetchRevenueData, 
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchItemFrequency,
+  fetchRevenueData,
   fetchOrderStatistics,
-  setDateRange 
-} from '../../redux/reportSlice';
-import { AppDispatch, RootState } from '../../redux/store';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+  setDateRange,
+} from "../../redux/reportSlice";
+import { AppDispatch, RootState } from "../../redux/store";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -23,44 +29,74 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
-} from 'recharts';
-import { 
-  generateRevenueReport, 
-  generateItemFrequencyReport, 
-  generateOrderStatisticsReport 
-} from '../../lib/pdf';
-import { useToast } from '@/hooks/use-toast';
-import { FileDown, DollarSign, ShoppingBasket, PieChart as PieChartIcon } from 'lucide-react';
+  Cell,
+} from "recharts";
+import {
+  generateRevenueReport,
+  generateItemFrequencyReport,
+  generateOrderStatisticsReport,
+} from "../../lib/pdf";
+import { useToast } from "@/hooks/use-toast";
+import {
+  FileDown,
+  DollarSign,
+  ShoppingBasket,
+  PieChart as PieChartIcon,
+} from "lucide-react";
 
-const CHART_COLORS = ['#1976D2', '#FF5722', '#4CAF50', '#9C27B0', '#FF9800', '#607D8B'];
+/**
+ * @constant CHART_COLORS
+ * @description An array of colors used for charts in the reports.
+ */
+const CHART_COLORS = [
+  "#1976D2",
+  "#FF5722",
+  "#4CAF50",
+  "#9C27B0",
+  "#FF9800",
+  "#607D8B",
+];
 
+/**
+ * @component Reports
+ * @description A page component that displays various reports and analytics related to restaurant operations.
+ * It includes revenue reports, item frequency reports, and order statistics, each displayed in its own tab.
+ * @returns {JSX.Element} - The reports page element.
+ */
 const Reports = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { 
-    itemFrequency, 
-    revenueData, 
-    orderStatistics, 
-    startDate, 
-    endDate, 
-    loading 
+  const {
+    itemFrequency,
+    revenueData,
+    orderStatistics,
+    startDate,
+    endDate,
+    loading,
   } = useSelector((state: RootState) => state.reports);
-  const [activeTab, setActiveTab] = useState('revenue');
+  const [activeTab, setActiveTab] = useState("revenue");
   const [localStartDate, setLocalStartDate] = useState(startDate);
   const [localEndDate, setLocalEndDate] = useState(endDate);
   const { toast } = useToast();
-  
-  // Fetch report data based on active tab and date range
+
+  /**
+   * @useEffect
+   * @description Fetches report data based on the active tab and date range.
+   */
   useEffect(() => {
-    if (activeTab === 'revenue') {
+    if (activeTab === "revenue") {
       dispatch(fetchRevenueData({ startDate, endDate }));
-    } else if (activeTab === 'items') {
+    } else if (activeTab === "items") {
       dispatch(fetchItemFrequency({ startDate, endDate }));
-    } else if (activeTab === 'orders') {
+    } else if (activeTab === "orders") {
       dispatch(fetchOrderStatistics({ startDate, endDate }));
     }
   }, [dispatch, activeTab, startDate, endDate]);
-  
+
+  /**
+   * @function handleApplyDateRange
+   * @description Applies the selected date range to the reports.
+   * It validates the date range and dispatches the setDateRange action to update the Redux store.
+   */
   const handleApplyDateRange = () => {
     if (new Date(localEndDate) < new Date(localStartDate)) {
       toast({
@@ -70,36 +106,43 @@ const Reports = () => {
       });
       return;
     }
-    
-    dispatch(setDateRange({ startDate: localStartDate, endDate: localEndDate }));
+
+    dispatch(
+      setDateRange({ startDate: localStartDate, endDate: localEndDate })
+    );
   };
-  
+
+  /**
+   * @function handleExportPDF
+   * @description Exports the currently displayed report as a PDF file.
+   * It generates the PDF document using the appropriate function based on the active tab and saves it with a descriptive filename.
+   */
   const handleExportPDF = () => {
     let pdfDoc;
     let fileName;
-    
+
     try {
-      if (activeTab === 'revenue' && revenueData) {
+      if (activeTab === "revenue" && revenueData) {
         pdfDoc = generateRevenueReport(
-          new Date(startDate), 
-          new Date(endDate), 
+          new Date(startDate),
+          new Date(endDate),
           revenueData
         );
-        fileName = 'revenue-report.pdf';
-      } else if (activeTab === 'items' && itemFrequency) {
+        fileName = "revenue-report.pdf";
+      } else if (activeTab === "items" && itemFrequency) {
         pdfDoc = generateItemFrequencyReport(
-          new Date(startDate), 
-          new Date(endDate), 
+          new Date(startDate),
+          new Date(endDate),
           itemFrequency
         );
-        fileName = 'item-frequency-report.pdf';
-      } else if (activeTab === 'orders' && orderStatistics) {
+        fileName = "item-frequency-report.pdf";
+      } else if (activeTab === "orders" && orderStatistics) {
         pdfDoc = generateOrderStatisticsReport(
-          new Date(startDate), 
-          new Date(endDate), 
+          new Date(startDate),
+          new Date(endDate),
           orderStatistics
         );
-        fileName = 'order-statistics-report.pdf';
+        fileName = "order-statistics-report.pdf";
       } else {
         toast({
           variant: "destructive",
@@ -108,9 +151,9 @@ const Reports = () => {
         });
         return;
       }
-      
+
       pdfDoc.save(fileName);
-      
+
       toast({
         title: "Export successful",
         description: `Report has been exported as ${fileName}`,
@@ -123,44 +166,79 @@ const Reports = () => {
       });
     }
   };
-  
-  // Prepare data for revenue chart
-  const revenueChartData = revenueData?.dailyRevenue 
+
+  /**
+   * @constant revenueChartData
+   * @description Prepares data for the revenue chart, mapping daily revenue data to a format suitable for the chart component.
+   */
+  const revenueChartData = revenueData?.dailyRevenue
     ? Object.entries(revenueData.dailyRevenue).map(([date, amount]) => ({
-        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        amount: Number(amount.toFixed(2))
+        date: new Date(date).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+        amount: Number(amount.toFixed(2)),
       }))
     : [];
-  
-  // Prepare data for payment method pie chart
+
+  /**
+   * @constant paymentMethodChartData
+   * @description Prepares data for the payment method pie chart, mapping revenue by payment method to a format suitable for the chart component.
+   */
   const paymentMethodChartData = revenueData?.revenueByMethod
     ? Object.entries(revenueData.revenueByMethod).map(([method, amount]) => ({
-        name: method.replace('_', ' ').toUpperCase(),
-        value: Number(amount.toFixed(2))
+        name: method.replace("_", " ").toUpperCase(),
+        value: Number(amount.toFixed(2)),
       }))
     : [];
-  
-  // Prepare data for item frequency chart (top 10 items)
+
+  /**
+   * @constant itemFrequencyChartData
+   * @description Prepares data for the item frequency chart, sorting items by order count and limiting the chart to the top 10 items.
+   */
   const itemFrequencyChartData = itemFrequency
     ? [...itemFrequency]
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
-        .map(item => ({
-          name: item.name.length > 15 ? item.name.substring(0, 12) + '...' : item.name,
-          count: item.count
+        .map((item) => ({
+          name:
+            item.name.length > 15
+              ? item.name.substring(0, 12) + "..."
+              : item.name,
+          count: item.count,
         }))
     : [];
-    
-  // Group items by category (inferring category from item name for demo)
+
+  /**
+   * @function getCategory
+   * @description Infers the category of a menu item based on its name.
+   * @param {string} itemName - The name of the menu item.
+   * @returns {string} - The inferred category of the menu item.
+   */
   const getCategory = (itemName: string): string => {
     const name = itemName.toLowerCase();
-    if (name.includes('nachos') || name.includes('appetizer')) return 'Appetizers';
-    if (name.includes('cake') || name.includes('pie') || name.includes('sundae')) return 'Desserts';
-    if (name.includes('soup') || name.includes('potion')) return 'Soups';
-    if (name.includes('coffee') || name.includes('tea') || name.includes('soda')) return 'Drinks';
-    return 'Main Course';
+    if (name.includes("nachos") || name.includes("appetizer"))
+      return "Appetizers";
+    if (
+      name.includes("cake") ||
+      name.includes("pie") ||
+      name.includes("sundae")
+    )
+      return "Desserts";
+    if (name.includes("soup") || name.includes("potion")) return "Soups";
+    if (
+      name.includes("coffee") ||
+      name.includes("tea") ||
+      name.includes("soda")
+    )
+      return "Drinks";
+    return "Main Course";
   };
-  
+
+  /**
+   * @constant itemsByCategory
+   * @description Aggregates item frequency data by category.
+   */
   const itemsByCategory = itemFrequency.reduce((acc, item) => {
     const category = getCategory(item.name);
     if (!acc[category]) {
@@ -169,38 +247,64 @@ const Reports = () => {
     acc[category] += item.count;
     return acc;
   }, {} as Record<string, number>);
-  
-  const itemsByCategoryChartData = Object.entries(itemsByCategory).map(([category, count]) => ({
-    name: category,
-    count
-  }));
-  
-  // Prepare data for orders by day of week chart
+
+  /**
+   * @constant itemsByCategoryChartData
+   * @description Prepares data for the items by category chart.
+   */
+  const itemsByCategoryChartData = Object.entries(itemsByCategory).map(
+    ([category, count]) => ({
+      name: category,
+      count,
+    })
+  );
+
+  /**
+   * @constant ordersByDayChartData
+   * @description Prepares data for the orders by day of week chart.
+   */
   const ordersByDayChartData = orderStatistics?.ordersByDayOfWeek
     ? [
-        { day: 'Sun', count: orderStatistics.ordersByDayOfWeek['Sunday'] || 0 },
-        { day: 'Mon', count: orderStatistics.ordersByDayOfWeek['Monday'] || 0 },
-        { day: 'Tue', count: orderStatistics.ordersByDayOfWeek['Tuesday'] || 0 },
-        { day: 'Wed', count: orderStatistics.ordersByDayOfWeek['Wednesday'] || 0 },
-        { day: 'Thu', count: orderStatistics.ordersByDayOfWeek['Thursday'] || 0 },
-        { day: 'Fri', count: orderStatistics.ordersByDayOfWeek['Friday'] || 0 },
-        { day: 'Sat', count: orderStatistics.ordersByDayOfWeek['Saturday'] || 0 }
+        { day: "Sun", count: orderStatistics.ordersByDayOfWeek["Sunday"] || 0 },
+        { day: "Mon", count: orderStatistics.ordersByDayOfWeek["Monday"] || 0 },
+        {
+          day: "Tue",
+          count: orderStatistics.ordersByDayOfWeek["Tuesday"] || 0,
+        },
+        {
+          day: "Wed",
+          count: orderStatistics.ordersByDayOfWeek["Wednesday"] || 0,
+        },
+        {
+          day: "Thu",
+          count: orderStatistics.ordersByDayOfWeek["Thursday"] || 0,
+        },
+        { day: "Fri", count: orderStatistics.ordersByDayOfWeek["Friday"] || 0 },
+        {
+          day: "Sat",
+          count: orderStatistics.ordersByDayOfWeek["Saturday"] || 0,
+        },
       ]
     : [];
-  
-  // Prepare data for orders by status pie chart
+
+  /**
+   * @constant ordersByStatusChartData
+   * @description Prepares data for the orders by status pie chart.
+   */
   const ordersByStatusChartData = orderStatistics?.ordersByStatus
     ? Object.entries(orderStatistics.ordersByStatus).map(([status, count]) => ({
-        name: status.replace('_', ' ').toUpperCase(),
-        value: count
+        name: status.replace("_", " ").toUpperCase(),
+        value: count,
       }))
     : [];
-  
+
   return (
     <div className="p-4 bg-gray-100">
       <Card className="mb-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xl font-bold">Reports & Analytics</CardTitle>
+          <CardTitle className="text-xl font-bold">
+            Reports & Analytics
+          </CardTitle>
           <Button onClick={handleExportPDF}>
             <FileDown className="mr-2 h-4 w-4" />
             Export PDF
@@ -209,7 +313,9 @@ const Reports = () => {
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <Label htmlFor="start-date" className="mb-1">Start Date</Label>
+              <Label htmlFor="start-date" className="mb-1">
+                Start Date
+              </Label>
               <Input
                 id="start-date"
                 type="date"
@@ -218,7 +324,9 @@ const Reports = () => {
               />
             </div>
             <div className="flex-1">
-              <Label htmlFor="end-date" className="mb-1">End Date</Label>
+              <Label htmlFor="end-date" className="mb-1">
+                End Date
+              </Label>
               <Input
                 id="end-date"
                 type="date"
@@ -230,7 +338,7 @@ const Reports = () => {
               <Button onClick={handleApplyDateRange}>Apply</Button>
             </div>
           </div>
-          
+
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
               <TabsTrigger value="revenue" className="flex items-center gap-1">
@@ -246,7 +354,7 @@ const Reports = () => {
                 Order Statistics
               </TabsTrigger>
             </TabsList>
-            
+
             {/* Revenue Report */}
             <TabsContent value="revenue">
               {loading ? (
@@ -259,33 +367,47 @@ const Reports = () => {
                     <Card>
                       <CardContent className="pt-4">
                         <div className="flex flex-col items-center">
-                          <p className="text-gray-500 text-sm mb-1">Total Revenue</p>
-                          <h3 className="text-2xl font-bold">${revenueData.totalRevenue.toFixed(2)}</h3>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="pt-4">
-                        <div className="flex flex-col items-center">
-                          <p className="text-gray-500 text-sm mb-1">Total Tips</p>
-                          <h3 className="text-2xl font-bold">${revenueData.totalTips.toFixed(2)}</h3>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="pt-4">
-                        <div className="flex flex-col items-center">
-                          <p className="text-gray-500 text-sm mb-1">Average Daily Revenue</p>
+                          <p className="text-gray-500 text-sm mb-1">
+                            Total Revenue
+                          </p>
                           <h3 className="text-2xl font-bold">
-                            ${(revenueData.totalRevenue / Object.keys(revenueData.dailyRevenue).length).toFixed(2)}
+                            ${revenueData.totalRevenue.toFixed(2)}
+                          </h3>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="flex flex-col items-center">
+                          <p className="text-gray-500 text-sm mb-1">
+                            Total Tips
+                          </p>
+                          <h3 className="text-2xl font-bold">
+                            ${revenueData.totalTips.toFixed(2)}
+                          </h3>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="flex flex-col items-center">
+                          <p className="text-gray-500 text-sm mb-1">
+                            Average Daily Revenue
+                          </p>
+                          <h3 className="text-2xl font-bold">
+                            $
+                            {(
+                              revenueData.totalRevenue /
+                              Object.keys(revenueData.dailyRevenue).length
+                            ).toFixed(2)}
                           </h3>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-                  
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Revenue by Day</CardTitle>
@@ -297,18 +419,22 @@ const Reports = () => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="date" />
                             <YAxis />
-                            <Tooltip 
-                              formatter={(value) => [`$${value}`, 'Revenue']}
+                            <Tooltip
+                              formatter={(value) => [`$${value}`, "Revenue"]}
                               labelFormatter={(label) => `Date: ${label}`}
                             />
                             <Legend />
-                            <Bar dataKey="amount" name="Revenue" fill="#1976D2" />
+                            <Bar
+                              dataKey="amount"
+                              name="Revenue"
+                              fill="#1976D2"
+                            />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Revenue by Payment Method</CardTitle>
@@ -325,13 +451,22 @@ const Reports = () => {
                               cy="50%"
                               outerRadius={80}
                               fill="#8884d8"
-                              label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                              label={({ name, percent }) =>
+                                `${name}: ${(percent * 100).toFixed(0)}%`
+                              }
                             >
                               {paymentMethodChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={
+                                    CHART_COLORS[index % CHART_COLORS.length]
+                                  }
+                                />
                               ))}
                             </Pie>
-                            <Tooltip formatter={(value) => [`$${value}`, 'Amount']} />
+                            <Tooltip
+                              formatter={(value) => [`$${value}`, "Amount"]}
+                            />
                             <Legend />
                           </PieChart>
                         </ResponsiveContainer>
@@ -345,7 +480,7 @@ const Reports = () => {
                 </div>
               )}
             </TabsContent>
-            
+
             {/* Item Frequency Report */}
             <TabsContent value="items">
               {loading ? (
@@ -361,21 +496,28 @@ const Reports = () => {
                     <CardContent>
                       <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={itemFrequencyChartData} layout="vertical">
+                          <BarChart
+                            data={itemFrequencyChartData}
+                            layout="vertical"
+                          >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis type="number" />
                             <YAxis dataKey="name" type="category" width={150} />
-                            <Tooltip 
-                              formatter={(value) => [`${value}`, 'Orders']}
+                            <Tooltip
+                              formatter={(value) => [`${value}`, "Orders"]}
                             />
                             <Legend />
-                            <Bar dataKey="count" name="Order Count" fill="#FF5722" />
+                            <Bar
+                              dataKey="count"
+                              name="Order Count"
+                              fill="#FF5722"
+                            />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Item Order Frequency</CardTitle>
@@ -385,41 +527,70 @@ const Reports = () => {
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Count</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Item Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Order Count
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Percentage
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {itemFrequency.sort((a, b) => b.count - a.count).map((item, index) => {
-                              // Calculate percentage of total orders
-                              const totalCount = itemFrequency.reduce((sum, item) => sum + item.count, 0);
-                              const percentage = totalCount > 0 ? (item.count / totalCount * 100).toFixed(1) : '0';
-                              
-                              return (
-                                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.count}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div className="flex items-center">
-                                      <span className="mr-2">{percentage}%</span>
-                                      <div className="w-24 bg-gray-200 rounded-full h-2.5">
-                                        <div 
-                                          className="bg-green-600 h-2.5 rounded-full" 
-                                          style={{ width: `${percentage}%` }}
-                                        ></div>
+                            {itemFrequency
+                              .sort((a, b) => b.count - a.count)
+                              .map((item, index) => {
+                                // Calculate percentage of total orders
+                                const totalCount = itemFrequency.reduce(
+                                  (sum, item) => sum + item.count,
+                                  0
+                                );
+                                const percentage =
+                                  totalCount > 0
+                                    ? ((item.count / totalCount) * 100).toFixed(
+                                        1
+                                      )
+                                    : "0";
+
+                                return (
+                                  <tr
+                                    key={index}
+                                    className={
+                                      index % 2 === 0
+                                        ? "bg-white"
+                                        : "bg-gray-50"
+                                    }
+                                  >
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                      {item.name}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                      {item.count}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                      <div className="flex items-center">
+                                        <span className="mr-2">
+                                          {percentage}%
+                                        </span>
+                                        <div className="w-24 bg-gray-200 rounded-full h-2.5">
+                                          <div
+                                            className="bg-green-600 h-2.5 rounded-full"
+                                            style={{ width: `${percentage}%` }}
+                                          ></div>
+                                        </div>
                                       </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
                           </tbody>
                         </table>
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   {/* Menu Item Popularity Chart */}
                   <Card className="mt-6">
                     <CardHeader>
@@ -439,25 +610,43 @@ const Reports = () => {
                               innerRadius={60}
                               paddingAngle={2}
                               fill="#8884d8"
-                              label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                              label={({ name, percent }) =>
+                                `${name}: ${(percent * 100).toFixed(0)}%`
+                              }
                             >
                               {itemFrequencyChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={
+                                    CHART_COLORS[index % CHART_COLORS.length]
+                                  }
+                                />
                               ))}
                             </Pie>
-                            <Tooltip formatter={(value, name, props) => [`${value} orders`, props.payload.name]} />
-                            <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                            <Tooltip
+                              formatter={(value, name, props) => [
+                                `${value} orders`,
+                                props.payload.name,
+                              ]}
+                            />
+                            <Legend
+                              layout="horizontal"
+                              verticalAlign="bottom"
+                              align="center"
+                            />
                           </PieChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   {/* Item Orders by Category */}
                   <Card className="mt-6">
                     <CardHeader>
                       <CardTitle>Orders by Food Category</CardTitle>
-                      <CardDescription>Analysis of order distribution across menu categories</CardDescription>
+                      <CardDescription>
+                        Analysis of order distribution across menu categories
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="grid md:grid-cols-2 gap-4">
@@ -472,27 +661,60 @@ const Reports = () => {
                                 cy="50%"
                                 outerRadius={100}
                                 fill="#8884d8"
-                                label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                label={({ name, percent }) =>
+                                  `${name}: ${(percent * 100).toFixed(0)}%`
+                                }
                               >
-                                {itemsByCategoryChartData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={CHART_COLORS[(index + 3) % CHART_COLORS.length]} />
-                                ))}
+                                {itemsByCategoryChartData.map(
+                                  (entry, index) => (
+                                    <Cell
+                                      key={`cell-${index}`}
+                                      fill={
+                                        CHART_COLORS[
+                                          (index + 3) % CHART_COLORS.length
+                                        ]
+                                      }
+                                    />
+                                  )
+                                )}
                               </Pie>
-                              <Tooltip formatter={(value, name, props) => [`${value} orders`, props.payload.name]} />
-                              <Legend layout="vertical" verticalAlign="middle" align="right" />
+                              <Tooltip
+                                formatter={(value, name, props) => [
+                                  `${value} orders`,
+                                  props.payload.name,
+                                ]}
+                              />
+                              <Legend
+                                layout="vertical"
+                                verticalAlign="middle"
+                                align="right"
+                              />
                             </PieChart>
                           </ResponsiveContainer>
                         </div>
-                        
+
                         <div className="h-80">
                           <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={itemsByCategoryChartData} layout="vertical">
+                            <BarChart
+                              data={itemsByCategoryChartData}
+                              layout="vertical"
+                            >
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis type="number" />
-                              <YAxis dataKey="name" type="category" width={100} />
-                              <Tooltip formatter={(value) => [`${value}`, 'Orders']} />
+                              <YAxis
+                                dataKey="name"
+                                type="category"
+                                width={100}
+                              />
+                              <Tooltip
+                                formatter={(value) => [`${value}`, "Orders"]}
+                              />
                               <Legend />
-                              <Bar dataKey="count" name="Order Count" fill="#4CAF50" />
+                              <Bar
+                                dataKey="count"
+                                name="Order Count"
+                                fill="#4CAF50"
+                              />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -506,7 +728,7 @@ const Reports = () => {
                 </div>
               )}
             </TabsContent>
-            
+
             {/* Order Statistics Report */}
             <TabsContent value="orders">
               {loading ? (
@@ -519,25 +741,35 @@ const Reports = () => {
                     <Card>
                       <CardContent className="pt-4">
                         <div className="flex flex-col items-center">
-                          <p className="text-gray-500 text-sm mb-1">Total Orders</p>
-                          <h3 className="text-2xl font-bold">{orderStatistics.totalOrders}</h3>
+                          <p className="text-gray-500 text-sm mb-1">
+                            Total Orders
+                          </p>
+                          <h3 className="text-2xl font-bold">
+                            {orderStatistics.totalOrders}
+                          </h3>
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardContent className="pt-4">
                         <div className="flex flex-col items-center">
-                          <p className="text-gray-500 text-sm mb-1">Average Order Amount</p>
-                          <h3 className="text-2xl font-bold">${orderStatistics.averageOrderAmount.toFixed(2)}</h3>
+                          <p className="text-gray-500 text-sm mb-1">
+                            Average Order Amount
+                          </p>
+                          <h3 className="text-2xl font-bold">
+                            ${orderStatistics.averageOrderAmount.toFixed(2)}
+                          </h3>
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardContent className="pt-4">
                         <div className="flex flex-col items-center">
-                          <p className="text-gray-500 text-sm mb-1">Orders per Day (Avg)</p>
+                          <p className="text-gray-500 text-sm mb-1">
+                            Orders per Day (Avg)
+                          </p>
                           <h3 className="text-2xl font-bold">
                             {(orderStatistics.totalOrders / 7).toFixed(1)}
                           </h3>
@@ -545,7 +777,7 @@ const Reports = () => {
                       </CardContent>
                     </Card>
                   </div>
-                  
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Orders by Day of Week</CardTitle>
@@ -559,13 +791,17 @@ const Reports = () => {
                             <YAxis />
                             <Tooltip />
                             <Legend />
-                            <Bar dataKey="count" name="Order Count" fill="#9C27B0" />
+                            <Bar
+                              dataKey="count"
+                              name="Order Count"
+                              fill="#9C27B0"
+                            />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Orders by Status</CardTitle>
@@ -582,10 +818,17 @@ const Reports = () => {
                               cy="50%"
                               outerRadius={80}
                               fill="#8884d8"
-                              label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                              label={({ name, percent }) =>
+                                `${name}: ${(percent * 100).toFixed(0)}%`
+                              }
                             >
                               {ordersByStatusChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={
+                                    CHART_COLORS[index % CHART_COLORS.length]
+                                  }
+                                />
                               ))}
                             </Pie>
                             <Tooltip />
