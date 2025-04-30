@@ -49,11 +49,11 @@ The server will start on the configured port (default: 5000).
 | Role    | Email                  | Password   |
 | ------- | ---------------------- | ---------- |
 | Admin   | admin@restaurant.com   | admin123   |
-| Owner   | owner@restaurant.com   | owner123   |
-| Manager | manager@restaurant.com | manager123 |
-| Chef    | chef@restaurant.com    | chef123    |
-| Waiter  | waiter@restaurant.com  | waiter123  |
-| Host    | host@restaurant.com    | host123    |
+| Owner   | owner@restaurant.com   | password123   |
+| Manager | manager@restaurant.com | password123 |
+| Chef    | chef@restaurant.com    | password123    |
+| Waiter  | waiter@restaurant.com  | password123  |
+| Host    | host@restaurant.com    | password123    |
 
 ## Features
 
